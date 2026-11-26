@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quadra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Direzione: modulo fiscale. Riquadri a filo sottile, etichette in mono, un solo gesto audace: l'evidenziatore giallo sullo stato corrente. */
+:root {
+  --paper: #F4F5F8; --card: #FFFFFF; --ink: #0E1A2B; --muted: #5A667A; --line: #D8DDE6;
+  --accent: #1B3BF0; --accent-ink: #FFFFFF; --mark: #FFE066; --mark-ink: #0E1A2B;
+  --ok: #146C43; --ok-bg: #E2F3EA; --warn: #8A5200; --warn-bg: #FFF0D1; --bad: #A8261D; --bad-bg: #FBE3E0;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0A111F; --card: #111A2D; --ink: #E9EEF8; --muted: #98A5BB; --line: #25314A;
+    --accent: #8097FF; --accent-ink: #0A111F; --mark: #FFD84D; --mark-ink: #0E1A2B;
+    --ok: #62D39B; --ok-bg: #11301F; --warn: #F2B85A; --warn-bg: #33250C; --bad: #FF8F86; --bad-bg: #3A1714;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0A111F; --card: #111A2D; --ink: #E9EEF8; --muted: #98A5BB; --line: #25314A;
+  --accent: #8097FF; --accent-ink: #0A111F; --mark: #FFD84D; --mark-ink: #0E1A2B;
+  --ok: #62D39B; --ok-bg: #11301F; --warn: #F2B85A; --warn-bg: #33250C; --bad: #FF8F86; --bad-bg: #3A1714;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { background: var(--paper); color: var(--ink); font: 400 1rem/1.5 var(--body); -webkit-text-size-adjust: 100%; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+h1 { font-size: 2rem; line-height: 1.1; }
+h2 { font-size: 1.35rem; line-height: 1.2; }
+h3 { font-size: 1.05rem; line-height: 1.25; }
+p { margin: 0; }
+button, select, textarea, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.mono { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.wrap { max-width: 520px; margin: 0 auto; padding: 0 16px 110px; }
+.wrap.wide { max-width: 980px; }
+.topbar { position: sticky; top: 0; z-index: 5; background: var(--paper); border-bottom: 1px solid var(--line); }
+.topbar-in { max-width: 980px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { font-family: var(--display); font-weight: 700; font-size: 1.35rem; display: flex; align-items: center; gap: 8px; }
+.brand-box { width: 22px; height: 22px; border: 2px solid var(--ink); display: grid; grid-template-columns: 1fr 1fr; }
+.brand-box i { border: 1px solid var(--ink); }
+.brand-box i:nth-child(2) { background: var(--mark); }
+.seg { display: inline-flex; border: 1px solid var(--ink); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 7px 12px; font-size: 0.875rem; font-weight: 600; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.seg.full { display: flex; }
+.seg.full button { flex: 1; }
+.bell { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 6px 10px; font-size: 0.875rem; font-weight: 600; display: inline-flex; gap: 6px; align-items: center; }
+.bell b { background: var(--mark); color: var(--mark-ink); border-radius: 999px; padding: 0 7px; font-size: 0.75rem; }
+:is(button, select, textarea, input, summary, a):focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.notice { background: var(--mark); color: var(--mark-ink); font-size: 0.8125rem; padding: 6px 16px; text-align: center; }
+.stack { display: flex; flex-direction: column; gap: 16px; }
+.stack-s { display: flex; flex-direction: column; gap: 8px; }
+.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.between { justify-content: space-between; }
+.grow { flex: 1; min-width: 0; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+.card.flat { padding: 0 16px; }
+.hero { padding: 24px 0 8px; display: flex; flex-direction: column; gap: 12px; }
+.hl { background: linear-gradient(transparent 58%, var(--mark) 58%); padding: 0 2px; }
+.lead { color: var(--muted); }
+.small { font-size: 0.875rem; }
+.profile { display: flex; flex-direction: column; gap: 6px; text-align: left; width: 100%; border: 1px solid var(--line); background: var(--card); border-radius: 10px; padding: 14px 16px; }
+.profile:hover { border-color: var(--ink); }
+.profile .tag { align-self: flex-start; font-family: var(--mono); font-size: 0.6875rem; border: 1px solid var(--ink); padding: 1px 6px; border-radius: 3px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--ink); background: var(--card); border-radius: 8px; padding: 10px 14px; font-weight: 600; font-size: 0.9375rem; min-height: 44px; text-decoration: none; color: var(--ink); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.danger { border-color: var(--bad); color: var(--bad); }
+.btn.ghost { border-color: var(--line); font-weight: 500; }
+.btn.sm { min-height: 36px; padding: 6px 10px; font-size: 0.8125rem; }
+.btn.block { width: 100%; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.progress { height: 8px; border: 1px solid var(--ink); border-radius: 4px; overflow: hidden; background: var(--card); }
+.progress > div { height: 100%; background: var(--accent); transition: width .25s; }
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.opt { border: 1px solid var(--ink); background: var(--card); border-radius: 8px; padding: 14px; font-weight: 600; min-height: 52px; }
+.opt:hover { background: var(--mark); color: var(--mark-ink); }
+.check { display: grid; grid-template-columns: 22px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.check:first-of-type { border-top: 0; }
+.box { width: 22px; height: 22px; border: 2px solid var(--ink); border-radius: 3px; display: grid; place-items: center; font-size: 14px; line-height: 1; }
+.box.on { background: var(--ink); color: var(--paper); }
+.fname { color: var(--muted); font-size: 0.8125rem; overflow-wrap: anywhere; }
+.chip { display: inline-flex; align-items: center; font-family: var(--mono); font-size: 0.6875rem; letter-spacing: .03em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; border: 1px solid transparent; white-space: nowrap; }
+.chip.cur { background: var(--mark); color: var(--mark-ink); border-color: var(--mark-ink); }
+.chip.ok { background: var(--ok-bg); color: var(--ok); }
+.chip.warn { background: var(--warn-bg); color: var(--warn); }
+.chip.bad { background: var(--bad-bg); color: var(--bad); }
+.chip.neutral { background: transparent; color: var(--muted); border-color: var(--line); }
+.tl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.tl li { display: grid; grid-template-columns: 24px 1fr; gap: 12px; padding-bottom: 18px; position: relative; }
+.tl li:not(:last-child)::before { content: ""; position: absolute; left: 11px; top: 26px; bottom: 0; width: 2px; background: var(--line); }
+.tl li.done:not(:last-child)::before { background: var(--ink); }
+.tl .dot { width: 24px; height: 24px; border: 2px solid var(--line); border-radius: 4px; display: grid; place-items: center; font-size: 13px; background: var(--card); }
+.tl li.done .dot { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.tl li.now .dot { border-color: var(--ink); background: var(--mark); color: var(--mark-ink); }
+.tl li.now .t { background: linear-gradient(transparent 62%, var(--mark) 62%); }
+.tl .t { font-weight: 600; }
+.msgs { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
+.msg { max-width: 88%; padding: 8px 12px; border-radius: 10px; font-size: 0.9375rem; border: 1px solid var(--line); background: var(--paper); overflow-wrap: anywhere; }
+.msg.me { align-self: flex-end; background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.msg.sys { align-self: center; background: transparent; border-style: dashed; color: var(--muted); font-size: 0.8125rem; }
+.msg small { display: block; font-family: var(--mono); font-size: 0.6875rem; opacity: .7; margin-top: 2px; }
+.composer { display: flex; gap: 8px; align-items: stretch; }
+.field, .composer input[type="text"], textarea.field, select.field { width: 100%; border: 1px solid var(--ink); border-radius: 8px; padding: 10px 12px; background: var(--card); color: var(--ink); min-height: 44px; }
+.composer input[type="text"] { flex: 1; min-width: 0; }
+textarea.field { min-height: 84px; resize: vertical; }
+label.lbl { display: flex; flex-direction: column; gap: 4px; font-size: 0.875rem; font-weight: 600; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.tile { border: 1px solid var(--line); background: var(--card); border-radius: 10px; padding: 12px; }
+.tile b { font-family: var(--display); font-size: 1.75rem; display: block; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.op-grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 760px) { .op-grid { grid-template-columns: 330px 1fr; align-items: start; } }
+.pcard { width: 100%; text-align: left; border: 1px solid var(--line); border-left: 4px solid var(--line); background: var(--card); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.pcard[aria-current="true"] { border-color: var(--ink); border-left-color: var(--ink); }
+.pcard.s-warn { border-left-color: var(--warn); }
+.pcard.s-ok { border-left-color: var(--ok); }
+.pcard.s-cur { border-left-color: var(--accent); }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.filters button { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 5px 12px; font-size: 0.8125rem; font-weight: 500; }
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.doc-row { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; padding: 12px 0; border-top: 1px solid var(--line); align-items: center; }
+.doc-row:first-of-type { border-top: 0; }
+.reasons { grid-column: 1 / -1; display: flex; gap: 6px; flex-wrap: wrap; }
+.row-btn { border: 1px solid var(--line); background: var(--card); border-radius: 6px; padding: 5px 9px; font-size: 0.8125rem; font-weight: 500; min-height: 34px; }
+.row-btn.ok { border-color: var(--ok); color: var(--ok); }
+.row-btn.bad { border-color: var(--bad); color: var(--bad); }
+.row-btn.cur { background: var(--mark); color: var(--mark-ink); border-color: var(--mark-ink); }
+.stepper { display: flex; gap: 4px; flex-wrap: wrap; }
+.back { border: 0; background: none; padding: 8px 0; font-weight: 600; color: var(--muted); display: inline-flex; gap: 6px; }
+.empty { color: var(--muted); font-size: 0.9375rem; }
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--paper); border-top: 1px solid var(--ink); }
+.tabbar-in { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); }
+.tabbar button { border: 0; background: transparent; padding: 10px 2px 12px; font-size: 0.75rem; font-weight: 600; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 56px; }
+.tabbar button i { width: 18px; height: 18px; border: 2px solid currentColor; border-radius: 3px; display: block; }
+.tabbar button[aria-current="page"] { color: var(--ink); }
+.tabbar button[aria-current="page"] i { background: var(--mark); border-color: var(--ink); }
+.optabs { display: flex; gap: 6px; overflow-x: auto; padding: 12px 0 4px; }
+.optabs button { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 8px 14px; font-weight: 600; font-size: 0.875rem; white-space: nowrap; }
+.optabs button[aria-current="page"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.menu { display: flex; flex-direction: column; }
+.menu button { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-align: left; width: 100%; border: 0; border-top: 1px solid var(--line); background: transparent; padding: 14px 0; font-weight: 600; }
+.menu button:first-child { border-top: 0; }
+.menu button span.lead { font-weight: 400; font-size: 0.8125rem; }
+.sw { position: relative; display: inline-block; width: 46px; height: 26px; flex: none; }
+.sw input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; width: 100%; height: 100%; }
+.sw span { position: absolute; inset: 0; border: 2px solid var(--ink); border-radius: 6px; background: var(--card); pointer-events: none; }
+.sw span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 2px; background: var(--ink); transition: transform .15s; }
+.sw input:checked + span { background: var(--mark); }
+.sw input:checked + span::after { transform: translateX(20px); }
+.sw input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+.setting { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.setting:first-child { border-top: 0; }
+.days, .slots { display: grid; gap: 8px; }
+.days { grid-template-columns: repeat(4, 1fr); }
+.slots { grid-template-columns: repeat(3, 1fr); }
+.pick { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 8px 4px; font-size: 0.8125rem; font-weight: 600; text-align: center; min-height: 44px; }
+.pick[aria-pressed="true"] { background: var(--mark); color: var(--mark-ink); border-color: var(--mark-ink); }
+.pick[disabled] { opacity: .4; text-decoration: line-through; cursor: not-allowed; }
+.appt { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.appt:first-of-type { border-top: 0; }
+.dayb { border: 1px solid var(--ink); border-radius: 6px; text-align: center; padding: 4px 8px; min-width: 56px; font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase; line-height: 1.3; }
+.dayb b { display: block; font-family: var(--display); font-size: 1.15rem; }
+table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+th, td { text-align: left; padding: 8px 6px; border-top: 1px solid var(--line); vertical-align: middle; }
+th { font-family: var(--mono); font-size: 0.6875rem; text-transform: uppercase; color: var(--muted); font-weight: 500; border-top: 0; }
+.tscroll { overflow-x: auto; }
+.bars { display: flex; flex-direction: column; gap: 8px; }
+.bar { display: grid; grid-template-columns: 130px 1fr 34px; gap: 8px; align-items: center; font-size: 0.8125rem; }
+.bar i { display: block; height: 14px; background: var(--accent); border-radius: 2px; min-width: 2px; }
+.avatar { width: 36px; height: 36px; border: 2px solid var(--ink); border-radius: 6px; display: grid; place-items: center; font-family: var(--display); font-weight: 700; background: var(--mark); color: var(--mark-ink); flex: none; }
+.stars { display: flex; gap: 4px; }
+.stars button { border: 1px solid var(--line); background: var(--card); width: 40px; height: 40px; border-radius: 6px; font-weight: 700; }
+.stars button[aria-pressed="true"] { background: var(--mark); color: var(--mark-ink); border-color: var(--mark-ink); }
+details.faq { border-top: 1px solid var(--line); padding: 10px 0; }
+details.faq:first-of-type { border-top: 0; }
+details.faq summary { font-weight: 600; cursor: pointer; }
+details.faq p { margin-top: 6px; color: var(--muted); font-size: 0.9375rem; }
+#toast { position: fixed; left: 50%; bottom: 78px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 8px; font-size: 0.875rem; z-index: 50; max-width: calc(100% - 32px); opacity: 0; pointer-events: none; transition: opacity .2s; text-align: center; }
+#toast.show { opacity: 1; }
+/* videochiamata */
+#overlay[hidden] { display: none; }
+#overlay { position: fixed; inset: 0; z-index: 40; background: #080D18; color: #EEF2FA; display: flex; flex-direction: column; }
+.call-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #1E2A42; }
+.call-top .mono { color: #9AA8C2; }
+.call-stage { flex: 1; min-height: 0; display: grid; gap: 12px; padding: 12px; grid-template-columns: 1fr; grid-template-rows: 1fr auto; position: relative; }
+@media (min-width: 820px) { .call-stage.has-side { grid-template-columns: 1fr 320px; grid-template-rows: 1fr; } }
+.tile-v { position: relative; border: 1px solid #25314A; border-radius: 12px; background: #0F1830; display: grid; place-items: center; overflow: hidden; min-height: 180px; }
+.big-av { width: 96px; height: 96px; border-radius: 16px; border: 3px solid #EEF2FA; display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 2.2rem; background: #FFD84D; color: #0E1A2B; }
+.big-av.talk { animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 216, 77, .5); } 50% { box-shadow: 0 0 0 14px rgba(255, 216, 77, 0); } }
+@media (prefers-reduced-motion: reduce) { .big-av.talk { animation: none; } }
+.tile-name { position: absolute; left: 10px; bottom: 8px; font-size: 0.8125rem; background: rgba(0, 0, 0, .55); padding: 2px 8px; border-radius: 4px; }
+.self-v { position: absolute; right: 10px; top: 10px; width: 112px; height: 84px; border: 2px solid #EEF2FA; border-radius: 10px; background: #16213D; display: grid; place-items: center; font-size: 0.75rem; text-align: center; padding: 4px; }
+.cap { position: absolute; left: 12px; right: 12px; bottom: 36px; background: rgba(0, 0, 0, .7); padding: 6px 10px; border-radius: 6px; font-size: 0.9375rem; text-align: center; }
+.share-doc { background: #fff; color: #0E1A2B; border-radius: 8px; padding: 14px; width: min(92%, 420px); max-height: 85%; overflow: auto; font-size: 0.875rem; }
+.share-doc .ln { height: 8px; background: #DDE3EE; border-radius: 3px; margin: 6px 0; }
+.side { border: 1px solid #25314A; border-radius: 12px; background: #0F1830; display: flex; flex-direction: column; min-height: 220px; max-height: 100%; overflow: hidden; }
+.side .msgs { padding: 10px; max-height: none; flex: 1; }
+.side .msg { background: #16213D; border-color: #25314A; color: #EEF2FA; }
+.side .msg.me { background: #FFD84D; color: #0E1A2B; border-color: #FFD84D; }
+.side form { display: flex; gap: 6px; padding: 8px; border-top: 1px solid #25314A; }
+.side input[type="text"] { flex: 1; min-width: 0; background: #16213D; border: 1px solid #25314A; color: #EEF2FA; border-radius: 6px; padding: 8px; }
+.ctrls { display: flex; justify-content: center; gap: 10px; padding: 12px; border-top: 1px solid #1E2A42; flex-wrap: wrap; }
+.ctrl { border: 1px solid #3A4868; background: #16213D; color: #EEF2FA; border-radius: 10px; padding: 10px 14px; font-size: 0.8125rem; font-weight: 600; min-height: 46px; min-width: 76px; }
+.ctrl[aria-pressed="true"] { background: #FFD84D; color: #0E1A2B; border-color: #FFD84D; }
+.ctrl.off { background: #3A1714; border-color: #FF8F86; color: #FF8F86; }
+.ctrl.end { background: #D8372B; border-color: #D8372B; color: #fff; }
+.lobby { margin: auto; width: min(94%, 460px); display: flex; flex-direction: column; gap: 14px; padding: 20px; }
+.lobby .tile-v { min-height: 200px; }
+</style>
+</head>
+<body>
+<header id="top" class="topbar"></header>
+<main id="app"></main>
+<div id="overlay" hidden></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ============ utilità ============ */
+var pad = function (n) { return String(n).padStart(2, "0"); };
+var isoDate = function (d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
+var plusDays = function (n) { var d = new Date(); d.setDate(d.getDate() + n); return isoDate(d); };
+var dayParts = function (iso) { var d = new Date(iso + "T12:00:00"); return { w: d.toLocaleDateString("it-IT", { weekday: "short" }), n: d.getDate(), m: d.toLocaleDateString("it-IT", { month: "short" }) }; };
+var dayLabel = function (iso) { return new Date(iso + "T12:00:00").toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" }); };
+var nowT = function () { return new Date().toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }); };
+var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+var money = function (n) { return Number(n).toLocaleString("it-IT", { style: "currency", currency: "EUR", minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); };
+var initials = function (n) { return String(n).replace(/\(.*?\)/g, "").trim().split(/\s+/).slice(0, 2).map(function (w) { return w[0] || ""; }).join("").toUpperCase() || "?"; };
+var fmtSecs = function (s) { return pad(Math.floor(s / 60)) + ":" + pad(s % 60); };
+var daysTo = function (m, d) {
+  var n = new Date(), t0 = new Date(n.getFullYear(), n.getMonth(), n.getDate()), t = new Date(n.getFullYear(), m - 1, d);
+  if (t < t0) t = new Date(n.getFullYear() + 1, m - 1, d);
+  return Math.round((t - t0) / 86400000);
+};
+
+/* ============ dati ============ */
+var STAGES = ["Ricevuta", "In verifica", "Pronta per la firma", "Inviata"];
+var STATUS_LIST = ["Ricevuta", "In verifica", "Da integrare", "Pronta per la firma", "Inviata"];
+var STAGE_OF = { "Ricevuta": 0, "In verifica": 1, "Da integrare": 1, "Pronta per la firma": 2, "Inviata": 3 };
+var STAGE_TEXT = {
+  "Ricevuta": "Abbiamo ricevuto i documenti. Un operatore prende in carico la pratica.",
+  "In verifica": "Stiamo controllando i documenti uno per uno.",
+  "Da integrare": "Serve un tuo intervento su alcuni documenti.",
+  "Pronta per la firma": "La pratica è pronta. Controllala, paga e firma.",
+  "Inviata": "Pratica inviata. La ricevuta resta qui nella tua area."
+};
+var REASONS = ["File non leggibile", "Manca una pagina", "Documento non corretto"];
+var TEMPLATES = [
+  "Ciao, ci serve una copia più leggibile del documento. Puoi caricarla di nuovo?",
+  "Grazie, abbiamo ricevuto tutto. Ti aggiorniamo appena la pratica è pronta.",
+  "Puoi prenotare una videochiamata dall'Agenda per chiarire un dubbio?"
+];
+var SLOTS = ["09:00", "10:00", "11:00", "15:00", "16:00", "17:00"];
+var CHANNELS = { video: "Videochiamata", tel: "Telefono", sede: "In sede" };
+
+var PROFILES = {
+  giovani: { name: "Prima dichiarazione", tag: "730", who: "Per chi lavora da poco, con contratto da dipendente", core: true,
+    base: [{ id: "doc", label: "Documento d'identità" }, { id: "ts", label: "Tessera sanitaria con codice fiscale" }, { id: "cu", label: "Certificazione Unica (CU)" }],
+    questions: [
+      { q: "Hai avuto più di un datore di lavoro l'anno scorso?", docs: [{ id: "cu2", label: "Altre Certificazioni Uniche" }] },
+      { q: "Paghi un affitto?", docs: [{ id: "aff", label: "Contratto di affitto e ricevute dei canoni" }] },
+      { q: "Hai sostenuto spese mediche?", docs: [{ id: "med", label: "Fatture, scontrini parlanti e ricevute" }] },
+      { q: "Hai un mutuo sulla casa in cui abiti?", docs: [{ id: "mut", label: "Contratto di mutuo e quietanza degli interessi" }] },
+      { q: "Hai pagato tasse universitarie o corsi?", docs: [{ id: "uni", label: "Ricevute di pagamento di tasse e corsi" }] }
+    ] },
+  piva: { name: "Partita IVA forfettaria", tag: "Redditi PF", who: "Per autonomi nel regime forfettario", core: true,
+    base: [{ id: "doc", label: "Documento d'identità" }, { id: "ts", label: "Tessera sanitaria con codice fiscale" }, { id: "fat", label: "Elenco delle fatture emesse nell'anno" }, { id: "f24", label: "Ricevute dei versamenti F24 (imposta sostitutiva)" }],
+    questions: [
+      { q: "Hai versato contributi INPS o alla tua cassa?", docs: [{ id: "inps", label: "Ricevute dei contributi previdenziali" }] },
+      { q: "Hai anche un lavoro da dipendente?", docs: [{ id: "cu", label: "Certificazione Unica (CU)" }] },
+      { q: "Hai spese personali detraibili (mediche, affitto)?", docs: [{ id: "det", label: "Fatture e ricevute delle spese detraibili" }] },
+      { q: "Hai ricevuto fatture elettroniche passive?", docs: [{ id: "pass", label: "Elenco delle fatture ricevute" }] },
+      { q: "Hai un conto o beni all'estero?", docs: [{ id: "est", label: "Estratti conto e valori all'estero" }] }
+    ] },
+  isee: { name: "Famiglia: ISEE e bonus", tag: "ISEE", who: "Per assegno unico, bonus e agevolazioni", core: true,
+    base: [{ id: "doc", label: "Documenti d'identità di tutti i componenti" }, { id: "cf", label: "Codici fiscali di tutti i componenti" }, { id: "red", label: "Redditi dei componenti (CU o dichiarazione)" }, { id: "cc", label: "Saldo e giacenza media dei conti al 31 dicembre" }],
+    questions: [
+      { q: "Vivete in affitto?", docs: [{ id: "aff", label: "Contratto di affitto e registrazione" }] },
+      { q: "Avete un mutuo?", docs: [{ id: "mut", label: "Contratto di mutuo e debito residuo" }] },
+      { q: "Possedete immobili o terreni?", docs: [{ id: "cat", label: "Visure catastali" }] },
+      { q: "Possedete veicoli?", docs: [{ id: "veh", label: "Targhe e libretti dei veicoli" }] },
+      { q: "Avete titoli, fondi o investimenti?", docs: [{ id: "inv", label: "Estratti di titoli e investimenti" }] }
+    ] },
+  imu: { name: "IMU e F24", tag: "IMU", who: "Calcolo e modello di pagamento per i tuoi immobili", core: false, questions: [],
+    base: [{ id: "doc", label: "Documento d'identità" }, { id: "cf", label: "Codice fiscale" }, { id: "cat", label: "Visure catastali degli immobili" }, { id: "atti", label: "Atto di acquisto o di successione" }] },
+  colf: { name: "Colf e badanti", tag: "Lavoro domestico", who: "Assunzione e gestione del contratto", core: false, questions: [],
+    base: [{ id: "doc1", label: "Documento d'identità del datore di lavoro" }, { id: "doc2", label: "Documento e codice fiscale del lavoratore" }, { id: "ctr", label: "Orario, mansioni e retribuzione concordati" }] },
+  successione: { name: "Dichiarazione di successione", tag: "Successione", who: "Pratica per gli eredi", core: false, questions: [],
+    base: [{ id: "morte", label: "Certificato di morte" }, { id: "eredi", label: "Documenti e codici fiscali degli eredi" }, { id: "beni", label: "Elenco di immobili, conti e veicoli" }, { id: "test", label: "Testamento, se presente" }] },
+  naspi: { name: "NASpI", tag: "Disoccupazione", who: "Domanda dopo la fine del rapporto di lavoro", core: false, questions: [],
+    base: [{ id: "doc", label: "Documento d'identità" }, { id: "cf", label: "Codice fiscale" }, { id: "fine", label: "Lettera di licenziamento o fine contratto" }, { id: "pag", label: "Dati per l'accredito della prestazione" }] },
+  dimissioni: { name: "Dimissioni online", tag: "Lavoro", who: "Comunicazione telematica delle dimissioni", core: false, questions: [],
+    base: [{ id: "doc", label: "Documento d'identità" }, { id: "cf", label: "Codice fiscale" }, { id: "ctr", label: "Dati del datore di lavoro e del contratto" }] },
+  spid: { name: "Aiuto con lo SPID", tag: "Identità digitale", who: "Ti aiutiamo ad attivarlo e usarlo", core: false, questions: [],
+    base: [{ id: "doc", label: "Documento d'identità" }, { id: "ts", label: "Tessera sanitaria" }, { id: "tel", label: "Numero di cellulare e email attivi" }] }
+};
+
+var team = [
+  { name: "Chiara M.", role: "Responsabile assistenza fiscale", load: 4 },
+  { name: "Davide L.", role: "Operatore", load: 6 },
+  { name: "Sara P.", role: "Amministrazione", load: 2 }
+];
+var ROLES = ["Responsabile assistenza fiscale", "Operatore", "Amministrazione"];
+var PERMS = [
+  ["Approvare documenti", [1, 1, 0]],
+  ["Dare il visto di conformità", [1, 0, 0]],
+  ["Inviare la pratica", [1, 0, 0]],
+  ["Gestire incassi e listino", [1, 0, 1]],
+  ["Gestire il team", [1, 0, 0]]
+];
+
+var seq = 2100;
+function mkDocs(arr) { return arr.map(function (a) { return { id: a[0], label: a[1], file: a[2], state: a[3] }; }); }
+var S = {
+  auth: false, authStep: "login", view: "client", tab: "home", screen: null, opTab: "pratiche",
+  profile: null, qi: 0, answers: [], draft: [], sel: null, opSel: "P-2041", filter: "all", q: "", qc: "", qd: "", reasonFor: null,
+  opDraft: "", clientSel: null, opUser: 0, toastT: null, timer: null, call: null, extraDocs: false,
+  book: { day: null, time: null, channel: "video", topic: "", praticaId: null, replaceId: null },
+  sim: "", assist: [{ from: "bot", text: "Ciao, sono l'assistente di Quadra. Chiedimi di documenti, tempi, prezzi o privacy. Le risposte del prototipo sono di esempio." }],
+  theme: "system", fs: 100, lang: "it",
+  flags: { push: true, email: true, sms: false, marketing: false, dati: true, partner: true, tfa: true, remDoc: true, rem730: true, remIMU: true, remISEE: false },
+  retention: "10", sessions: [{ id: "s1", dev: "Questo telefono", when: "Adesso", here: true }, { id: "s2", dev: "Computer portatile", when: "Ieri", here: false }],
+  me: { nome: "Nome Cognome", email: "nome@esempio.it", tel: "333 000 0000" },
+  family: [{ name: "Coniuge (esempio)", rel: "Coniuge" }], deleteStep: 0,
+  tickets: [], rating: 0,
+  prices: { giovani: 49, piva: 90, isee: 0, imu: 25, colf: 40, successione: 150, naspi: 20, dimissioni: 15, spid: 10 },
+  docs: [
+    { id: "d1", name: "Carta d'identità", cat: "Identità", year: 2024, exp: plusDays(45) },
+    { id: "d2", name: "Tessera sanitaria", cat: "Identità", year: 2023, exp: plusDays(600) },
+    { id: "d3", name: "CU 2025", cat: "Redditi", year: 2025, exp: null },
+    { id: "d4", name: "Contratto di affitto", cat: "Casa", year: 2024, exp: null },
+    { id: "d5", name: "Ricevute spese mediche", cat: "Spese", year: 2025, exp: null }
+  ],
+  notifs: [{ id: 1, text: "Benvenuta in Quadra. Qui trovi gli aggiornamenti sulle tue pratiche.", time: "Oggi", read: false }],
+  clientNotes: {}, invited: 2,
+  appts: [
+    { id: "A-1", owner: "me", who: "Tu (demo)", day: plusDays(1), time: "10:00", channel: "video", topic: "Dubbi sul 730", with: "Chiara M.", status: "confermato" },
+    { id: "A-2", owner: "other", who: "Marco T.", day: plusDays(1), time: "15:00", channel: "video", topic: "Fatture da integrare", with: "Davide L.", status: "confermato" },
+    { id: "A-3", owner: "other", who: "Famiglia Bianchi", day: plusDays(2), time: "11:00", channel: "tel", topic: "Firma ISEE", with: "Chiara M.", status: "confermato" }
+  ],
+  extraClients: [{ name: "Elena V.", tag: "Giovani" }, { name: "Paolo S.", tag: "Forfettario" }],
+  inbox: [
+    { id: "P-2041", owner: "other", name: "Giulia R.", profile: "giovani", status: "In verifica", due: "tra 12 giorni", assignee: "Davide L.", amount: 49, paid: true, visto: false, signed: false, protocol: null, rating: 0,
+      docs: mkDocs([["doc", "Documento d'identità", "identita.pdf", "ok"], ["ts", "Tessera sanitaria con codice fiscale", "tessera.jpg", "ok"], ["cu", "Certificazione Unica (CU)", "CU-2025.pdf", "caricato"], ["aff", "Contratto di affitto e ricevute dei canoni", "affitto.pdf", "caricato"]]),
+      messages: [{ from: "cliente", text: "Ho caricato anche le ricevute dell'affitto.", time: "09:12" }], notes: ["Controllare importo affitto con il contratto."], audit: [{ t: "Ieri", x: "Pratica ricevuta" }, { t: "Oggi 08:40", x: "Presa in carico da Davide L." }] },
+    { id: "P-2038", owner: "other", name: "Marco T.", profile: "piva", status: "Da integrare", due: "tra 5 giorni", assignee: "Davide L.", amount: 90, paid: false, visto: false, signed: false, protocol: null, rating: 0,
+      docs: mkDocs([["doc", "Documento d'identità", "doc.pdf", "ok"], ["ts", "Tessera sanitaria con codice fiscale", "ts.pdf", "ok"], ["fat", "Elenco delle fatture emesse nell'anno", "fatture.xlsx", "da integrare"], ["f24", "Ricevute dei versamenti F24 (imposta sostitutiva)", "f24.pdf", "caricato"]]),
+      messages: [{ from: "operatore", text: "L'elenco delle fatture è incompleto: manca il primo trimestre.", time: "Ieri" }], notes: [], audit: [{ t: "Ieri", x: "Richiesta integrazione: fatture" }] },
+    { id: "P-2030", owner: "other", name: "Famiglia Bianchi", profile: "isee", status: "Pronta per la firma", due: "tra 2 giorni", assignee: "Chiara M.", amount: 0, paid: true, visto: false, signed: false, protocol: null, rating: 0,
+      docs: mkDocs([["doc", "Documenti d'identità di tutti i componenti", "documenti.pdf", "ok"], ["cf", "Codici fiscali di tutti i componenti", "cf.pdf", "ok"], ["red", "Redditi dei componenti (CU o dichiarazione)", "redditi.pdf", "ok"], ["cc", "Saldo e giacenza media dei conti al 31 dicembre", "conti.pdf", "ok"]]),
+      messages: [{ from: "operatore", text: "Tutto in ordine. Aspettiamo la firma.", time: "Ieri" }], notes: [], audit: [{ t: "Ieri", x: "Tutti i documenti approvati" }] },
+    { id: "P-1987", owner: "me", name: "Tu (demo)", profile: "giovani", status: "Inviata", year: 2025, due: "chiusa", assignee: "Davide L.", amount: 49, paid: true, visto: true, signed: true, protocol: "PROT-2025-18841", rating: 5,
+      docs: mkDocs([["doc", "Documento d'identità", "identita.pdf", "ok"], ["ts", "Tessera sanitaria con codice fiscale", "tessera.pdf", "ok"], ["cu", "Certificazione Unica (CU)", "CU-2024.pdf", "ok"]]),
+      messages: [], notes: [], audit: [{ t: "2025", x: "Pratica inviata" }] }
+  ]
+};
+
+/* ============ helpers di stato ============ */
+function myPratiche() { return S.inbox.filter(function (p) { return p.owner === "me"; }); }
+function myAppts() { return S.appts.filter(function (a) { return a.owner === "me"; }); }
+function getP(id) { return S.inbox.filter(function (p) { return p.id === id; })[0]; }
+function findDoc(list, id) { return list.filter(function (d) { return d.id === id; })[0]; }
+function pushMsg(p, from, text) { p.messages.push({ from: from, text: text, time: nowT() }); }
+function audit(p, x) { p.audit.push({ t: "Oggi " + nowT(), x: x }); }
+function notify(text) { S.notifs.unshift({ id: Date.now() + Math.random(), text: text, time: "Oggi " + nowT(), read: false }); }
+function toast(m) {
+  var el = document.getElementById("toast"); if (!el) return;
+  el.textContent = m; el.className = "show";
+  clearTimeout(S.toastT); S.toastT = setTimeout(function () { el.className = ""; }, 2600);
+}
+function curUser() { return team[S.opUser] || team[0]; }
+function isResp() { return curUser().role === ROLES[0]; }
+function priceOf(k) { return S.prices[k] || 0; }
+function buildDraft() {
+  var pr = PROFILES[S.profile], seen = {}, out = [];
+  pr.base.forEach(function (d) { seen[d.id] = 1; out.push({ id: d.id, label: d.label, file: null }); });
+  pr.questions.forEach(function (q, i) { if (S.answers[i]) q.docs.forEach(function (d) { if (!seen[d.id]) { seen[d.id] = 1; out.push({ id: d.id, label: d.label, file: null }); } }); });
+  S.draft = out;
+}
+function setStatus(p, s) {
+  if (s === "Pronta per la firma" && p.docs.some(function (d) { return d.state !== "ok"; })) { toast("Approva prima tutti i documenti."); return false; }
+  if (s === "Inviata" && !p.visto) { toast("Serve il visto di conformità del responsabile."); return false; }
+  if (s === "Inviata" && !p.signed) { toast("Il cliente deve ancora firmare."); return false; }
+  p.status = s;
+  if (s === "Inviata") { p.protocol = "PROT-" + new Date().getFullYear() + "-" + (10000 + Math.floor(Math.random() * 89999)); audit(p, "Pratica inviata, protocollo " + p.protocol); } else { audit(p, "Stato: " + s); }
+  pushMsg(p, "sys", "Stato aggiornato: " + s + ".");
+  if (p.owner === "me") notify("La tua pratica " + p.id + " è ora: " + s + ".");
+  return true;
+}
+function afterReupload(p) {
+  if (!p.docs.some(function (d) { return d.state === "da integrare"; }) && p.status === "Da integrare") { p.status = "In verifica"; pushMsg(p, "sys", "Documenti sostituiti, pratica di nuovo in verifica."); audit(p, "Documenti reintegrati dal cliente"); }
+}
+function slotTaken(day, time, ignoreId) {
+  var di = [0, 1, 2, 3, 4, 5, 6, 7].filter(function (i) { return plusDays(i) === day; })[0];
+  var si = SLOTS.indexOf(time);
+  if (di === undefined || si < 0) return true;
+  if ((di * 7 + si) % 4 === 0) return true;
+  return S.appts.some(function (a) { return a.id !== ignoreId && a.day === day && a.time === time && a.status === "confermato"; });
+}
+function deadlines() {
+  var l = [
+    { id: "d730", name: "Presentazione del 730", when: daysTo(9, 30), date: "30 settembre", flag: "rem730" },
+    { id: "dimu", name: "Saldo IMU", when: daysTo(12, 16), date: "16 dicembre", flag: "remIMU" },
+    { id: "disee", name: "Rinnovo ISEE", when: daysTo(12, 31), date: "31 dicembre, di norma", flag: "remISEE" }
+  ];
+  S.docs.forEach(function (d) {
+    if (d.exp) { var t = new Date(d.exp + "T12:00:00"), n = new Date(); l.push({ id: "x" + d.id, name: d.name + ": scadenza", when: Math.round((t - n) / 86400000), date: dayLabel(d.exp), flag: "remDoc" }); }
+  });
+  return l.sort(function (a, b) { return a.when - b.when; });
+}
+function clientsList() {
+  var map = {}, tags = { giovani: "Giovani", piva: "Forfettario", isee: "Famiglia" };
+  S.inbox.forEach(function (p) { var k = p.name; (map[k] = map[k] || { name: k, tag: tags[p.profile] || PROFILES[p.profile].tag, n: 0 }).n++; });
+  S.extraClients.forEach(function (c) { if (!map[c.name]) map[c.name] = { name: c.name, tag: c.tag, n: 0 }; });
+  return Object.keys(map).map(function (k) { return map[k]; });
+}
+
+/* ============ componenti ============ */
+function docChip(st) {
+  if (st === "ok") return '<span class="chip ok">Approvato</span>';
+  if (st === "da integrare") return '<span class="chip bad">Da integrare</span>';
+  if (st === "caricato") return '<span class="chip neutral">Da controllare</span>';
+  return '<span class="chip neutral">Mancante</span>';
+}
+function statusChip(s) {
+  var cls = s === "Da integrare" ? "warn" : (s === "Inviata" || s === "Pronta per la firma" ? "ok" : "cur");
+  return '<span class="chip ' + cls + '">' + esc(s) + "</span>";
+}
+function messagesBlock(p, me, formKey) {
+  var h = '<div class="card stack-s"><span class="mono">Messaggi</span><div class="msgs" aria-live="polite">';
+  if (!p.messages.length) h += '<p class="empty">Nessun messaggio. Scrivi qui se hai un dubbio.</p>';
+  p.messages.forEach(function (m) {
+    if (m.from === "sys") h += '<div class="msg sys">' + esc(m.text) + " · " + esc(m.time) + "</div>";
+    else h += '<div class="msg' + (m.from === me ? " me" : "") + '">' + esc(m.text) + "<small>" + (m.from === "cliente" ? "Cliente" : "Operatore") + " · " + esc(m.time) + "</small></div>";
+  });
+  h += '</div><form class="composer" data-form="msg" data-who="' + me + '"><input type="text" name="t" id="msg-' + me + '" aria-label="Scrivi un messaggio" placeholder="Scrivi un messaggio" autocomplete="off"' + (me === "operatore" ? ' value="' + esc(S.opDraft) + '" data-i="opdraft"' : "") + '><label class="btn ghost" style="min-height:44px"><input type="file" hidden data-ctx="chat" data-p="' + esc(p.id) + '" data-who="' + me + '">Allega</label><button class="btn primary" type="submit">Invia</button></form>';
+  if (me === "operatore") { h += '<div class="row">'; TEMPLATES.forEach(function (t, i) { h += '<button class="row-btn" data-a="tpl" data-i="' + i + '">Modello ' + (i + 1) + "</button>"; }); h += "</div>"; }
+  return h + "</div>";
+}
+
+/* ============ top bar ============ */
+function renderTop() {
+  var unread = S.notifs.filter(function (n) { return !n.read; }).length;
+  document.getElementById("top").innerHTML = '<div class="topbar-in"><div class="brand" aria-label="Quadra"><span class="brand-box" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Quadra</div><div class="row">' +
+    (S.view === "client" && S.auth ? '<button class="bell" data-a="go" data-s="notif" aria-label="Avvisi, ' + unread + ' nuovi">Avvisi' + (unread ? "<b>" + unread + "</b>" : "") + "</button>" : "") +
+    '<div class="seg" role="group" aria-label="Scegli la vista"><button id="v-client" data-a="view" data-v="client" aria-pressed="' + (S.view === "client") + '">Cliente</button><button id="v-op" data-a="view" data-v="op" aria-pressed="' + (S.view === "op") + '">Operatore</button></div></div></div>' +
+    '<div class="notice">Prototipo con dati di esempio e videochiamata simulata. Nome, testi, prezzi e documenti vanno validati con il partner abilitato.</div>';
+}
+
+/* ============ cliente ============ */
+function viewClient() {
+  if (!S.auth) return loginView();
+  var map = { quiz: cQuiz, list: cList, pratica: cPratica, book: cBook, profile: cProfile, deadlines: cDeadlines, sim: cSim, assistant: cAssistant, services: cServices, invite: cInvite, prefs: cPrefs, privacy: cPrivacy, security: cSecurity, settings: cSettings, support: cSupport, notif: cNotif };
+  var body;
+  if (S.screen && map[S.screen]) body = map[S.screen]();
+  else body = ({ home: cHome, pratiche: cPratiche, agenda: cAgenda, docs: cDocs, more: cMore })[S.tab]();
+  var tabs = [["home", "Home"], ["pratiche", "Pratiche"], ["agenda", "Agenda"], ["docs", "Documenti"], ["more", "Altro"]];
+  return '<div class="wrap">' + body + '</div><nav class="tabbar" aria-label="Sezioni"><div class="tabbar-in">' + tabs.map(function (t) {
+    return '<button data-a="tab" data-t="' + t[0] + '"' + (!S.screen && S.tab === t[0] ? ' aria-current="page"' : "") + "><i></i>" + t[1] + "</button>";
+  }).join("") + "</div></nav>";
+}
+function backBtn(label) { return '<button class="back" data-a="back">&larr; ' + (label || "Indietro") + "</button>"; }
+function loginView() {
+  if (S.authStep === "otp") {
+    return '<div class="wrap"><section class="hero"><span class="mono">Verifica in due passaggi</span><h1>Inserisci il <span class="hl">codice</span></h1><p class="lead">Ti abbiamo inviato un codice di sei cifre. Nel prototipo è già compilato.</p></section>' +
+      '<form class="stack" data-form="otp"><input class="field" type="text" inputmode="numeric" id="otp" aria-label="Codice di verifica" value="482913" autocomplete="one-time-code"><button class="btn primary block" type="submit">Conferma e entra</button><button type="button" class="back" data-a="login-back">&larr; Cambia metodo</button></form></div>';
+  }
+  return '<div class="wrap"><section class="hero"><span class="mono">Dichiarazioni e pratiche</span><h1>Le tue carte in regola, <span class="hl">senza fila</span>.</h1>' +
+    '<p class="lead">Accedi per vedere le tue pratiche, prenotare una videochiamata e caricare i documenti.</p></section><div class="stack-s">' +
+    '<button class="btn primary block" data-a="login" data-m="spid">Entra con SPID (simulato)</button><button class="btn block" data-a="login" data-m="cie">Entra con CIE (simulato)</button><button class="btn ghost block" data-a="login" data-m="mail">Entra con email e password (simulato)</button></div>' +
+    '<p class="lead small" style="margin-top:16px">Nel prototipo nessun accesso è reale e nessun dato viene salvato.</p></div>';
+}
+function cHome() {
+  var mine = myPratiche().filter(function (p) { return p.status !== "Inviata"; });
+  var appts = myAppts().filter(function (a) { return a.status === "confermato"; });
+  var dl = deadlines().slice(0, 2);
+  var h = '<section class="hero"><span class="mono">Ciao</span><h1>Cosa facciamo <span class="hl">oggi</span>?</h1></section><div class="stack">';
+  h += '<div class="opts"><button class="opt" data-a="go" data-s="services">Nuova pratica</button><button class="opt" data-a="book-new">Prenota una chiamata</button><button class="opt" data-a="go" data-s="assistant">Chiedi all\'assistente</button><button class="opt" data-a="go" data-s="sim">Simulatore detrazioni</button></div>';
+  if (mine.length) {
+    h += '<div class="stack-s"><span class="mono">Pratiche in corso</span>';
+    mine.forEach(function (p) { h += '<button class="profile" data-a="open-p" data-id="' + esc(p.id) + '"><div class="row between"><h3>' + esc(PROFILES[p.profile].name) + "</h3>" + statusChip(p.status) + '</div><span class="lead small">' + esc(STAGE_TEXT[p.status]) + "</span></button>"; });
+    h += "</div>";
+  }
+  if (appts.length) {
+    h += '<div class="card"><span class="mono">Prossimo appuntamento</span>' + apptRow(appts[0], true) + "</div>";
+  }
+  h += '<div class="card stack-s"><div class="row between"><span class="mono">Scadenze</span><button class="row-btn" data-a="go" data-s="deadlines">Tutte</button></div>';
+  dl.forEach(function (d) { h += '<div class="row between"><span>' + esc(d.name) + '</span><span class="chip ' + (d.when < 30 ? "warn" : "neutral") + '">tra ' + d.when + " giorni</span></div>"; });
+  h += "</div>";
+  h += '<div class="card row between"><div class="grow"><h3>Invita un amico</h3><p class="lead small">Condividi il tuo codice e ricevi un vantaggio di esempio.</p></div><button class="btn sm" data-a="go" data-s="invite">Apri</button></div></div>';
+  return h;
+}
+function apptRow(a, withCall) {
+  var d = dayParts(a.day);
+  var h = '<div class="appt"><div class="dayb">' + esc(d.w) + "<b>" + d.n + "</b>" + esc(d.m) + '</div><div><b>' + esc(a.time) + " · " + esc(CHANNELS[a.channel]) + "</b><div class=\"fname\">" + esc(a.topic || "Appuntamento") + " con " + esc(a.with) + "</div>" +
+    (a.status !== "confermato" ? '<span class="chip neutral">' + esc(a.status) + "</span>" : "") + '</div><div class="stack-s">';
+  if (a.status === "confermato" && withCall) {
+    if (a.channel === "video") h += '<button class="btn sm primary" data-a="join" data-id="' + a.id + '">Entra</button>';
+    h += '<button class="row-btn" data-a="appt-move" data-id="' + a.id + '">Sposta</button><button class="row-btn bad" data-a="appt-cancel" data-id="' + a.id + '">Annulla</button>';
+  }
+  return h + "</div></div>";
+}
+function cPratiche() {
+  var mine = myPratiche(), cur = mine.filter(function (p) { return p.status !== "Inviata"; }), old = mine.filter(function (p) { return p.status === "Inviata"; });
+  var h = '<section class="hero"><span class="mono">Le tue pratiche</span><h2>Pratiche</h2></section><div class="stack">';
+  h += '<button class="btn primary block" data-a="go" data-s="services">Nuova pratica</button>';
+  h += '<div class="stack-s"><span class="mono">In corso</span>' + (cur.length ? "" : '<p class="empty">Nessuna pratica in corso.</p>');
+  cur.forEach(function (p) { h += '<button class="profile" data-a="open-p" data-id="' + esc(p.id) + '"><div class="row between"><h3>' + esc(PROFILES[p.profile].name) + "</h3>" + statusChip(p.status) + '</div><span class="fname">' + esc(p.id) + "</span></button>"; });
+  h += '</div><div class="stack-s"><span class="mono">Storico</span>';
+  old.forEach(function (p) { h += '<button class="profile" data-a="open-p" data-id="' + esc(p.id) + '"><div class="row between"><h3>' + esc(PROFILES[p.profile].name) + (p.year ? " " + p.year : "") + "</h3>" + statusChip(p.status) + '</div><span class="fname">' + esc(p.protocol || p.id) + "</span></button>"; });
+  return h + "</div></div>";
+}
+function cServices() {
+  var h = backBtn() + '<section class="hero" style="padding-top:4px"><span class="mono">Servizi</span><h2>Che cosa devi fare?</h2></section><div class="stack-s">';
+  Object.keys(PROFILES).forEach(function (k) {
+    var pr = PROFILES[k];
+    h += '<button class="profile" data-a="pick" data-p="' + k + '"><div class="row between"><span class="tag">' + esc(pr.tag) + '</span><span class="fname">da ' + (priceOf(k) ? money(priceOf(k)) : "0 €") + " (esempio)</span></div><h3>" + esc(pr.name) + '</h3><span class="lead small">' + esc(pr.who) + "</span></button>";
+  });
+  return h + "</div>";
+}
+function cQuiz() {
+  var pr = PROFILES[S.profile], q = pr.questions[S.qi], n = pr.questions.length;
+  return '<div class="stack" style="padding-top:12px">' + backBtn() +
+    '<div class="stack-s"><span class="mono">Domanda ' + (S.qi + 1) + " di " + n + " · " + esc(pr.name) + '</span><div class="progress" role="progressbar" aria-valuenow="' + S.qi + '" aria-valuemin="0" aria-valuemax="' + n + '"><div style="width:' + Math.round(S.qi / n * 100) + '%"></div></div></div>' +
+    "<h2>" + esc(q.q) + '</h2><div class="opts"><button class="opt" data-a="answer" data-v="1">Sì</button><button class="opt" data-a="answer" data-v="0">No</button></div><p class="lead small">Le risposte servono solo a preparare la lista dei documenti.</p></div>';
+}
+function cList() {
+  var pr = PROFILES[S.profile], done = S.draft.filter(function (d) { return d.file; }).length, n = S.draft.length;
+  var h = '<div class="stack" style="padding-top:12px">' + backBtn() + '<div class="stack-s"><span class="mono">' + esc(pr.name) + "</span><h2>Ecco cosa serve</h2><p class=\"lead\">" + n + " documenti per la tua situazione. Carica un file per ciascuno (PDF o foto).</p></div>" +
+    '<div class="card stack-s"><div class="row between"><span class="mono">Preventivo (importo di esempio)</span><b>' + (priceOf(S.profile) ? money(priceOf(S.profile)) : "Incluso") + '</b></div><p class="lead small">Il pagamento arriva dopo il controllo dei documenti.</p></div>' +
+    '<div class="stack-s"><div class="row between"><span class="mono">' + done + " di " + n + ' caricati</span><div class="row"><button class="btn sm ghost" data-a="from-cassetto">Prendi dal cassetto</button><button class="btn sm ghost" data-a="demo">File di esempio</button></div></div><div class="progress"><div style="width:' + Math.round(done / n * 100) + '%"></div></div></div><div class="card">';
+  S.draft.forEach(function (d) {
+    h += '<div class="check"><span class="box' + (d.file ? " on" : "") + '" aria-hidden="true">' + (d.file ? "&#10003;" : "") + "</span><div><div>" + esc(d.label) + '</div><div class="fname">' + (d.file ? esc(d.file) : "Non ancora caricato") + "</div></div>" +
+      '<div class="row"><label class="btn sm ghost"><input type="file" hidden accept="image/*,application/pdf" capture="environment" data-ctx="draft" data-doc="' + d.id + '">Scatta</label><label class="btn sm ghost"><input type="file" hidden data-ctx="draft" data-doc="' + d.id + '">' + (d.file ? "Cambia" : "Carica") + "</label></div></div>";
+  });
+  return h + '</div><button class="btn primary" data-a="submit"' + (done < n ? " disabled" : "") + ">Invia la pratica</button>" + (done < n ? '<p class="lead small">Mancano ' + (n - done) + " documenti per poter inviare.</p>" : "") + "</div>";
+}
+function cPratica() {
+  var p = getP(S.sel); if (!p) return backBtn() + '<p class="empty">Pratica non trovata.</p>';
+  var st = STAGE_OF[p.status], pr = PROFILES[p.profile];
+  var h = '<div class="stack" style="padding-top:12px">' + backBtn() + '<div class="stack-s"><span class="mono">Pratica ' + esc(p.id) + '</span><div class="row between"><h2>' + esc(pr.name) + "</h2>" + statusChip(p.status) + "</div></div>";
+  h += '<div class="card stack-s"><span class="mono">Cosa succede ora</span><p>' + esc(STAGE_TEXT[p.status]) + "</p>";
+  if (p.status === "Pronta per la firma") {
+    if (p.signed) h += '<span class="chip ok">Firma ricevuta</span><p class="lead small">Ora il responsabile applica il visto e invia la pratica.</p>';
+    else h += '<button class="btn primary" data-a="sign"' + (!p.paid && p.amount > 0 ? " disabled" : "") + ">Firma con codice SMS (simulato)</button>" + (!p.paid && p.amount > 0 ? '<p class="lead small">Completa prima il pagamento qui sotto.</p>' : "");
+  }
+  if (p.protocol) h += '<div class="row between"><span class="mono">Protocollo</span><b>' + esc(p.protocol) + '</b></div><button class="btn sm ghost" data-a="download">Scarica la ricevuta</button>';
+  h += "</div>";
+  h += '<div class="card"><span class="mono">Avanzamento</span><ol class="tl" style="margin-top:12px">';
+  STAGES.forEach(function (s, i) { var cls = i < st ? "done" : (i === st ? (p.status === "Inviata" ? "done" : "now") : ""); h += '<li class="' + cls + '"><span class="dot" aria-hidden="true">' + (cls === "done" ? "&#10003;" : "") + '</span><div><span class="t">' + esc(s) + "</span></div></li>"; });
+  h += "</ol></div>";
+  h += '<div class="card stack-s"><div class="row between"><span class="mono">Pagamento</span>' + (p.paid || p.amount === 0 ? '<span class="chip ok">' + (p.amount ? "Pagato" : "Incluso") + "</span>" : '<span class="chip warn">Da pagare</span>') + "</div>" +
+    '<div class="row between"><span>' + esc(pr.name) + "</span><b>" + (p.amount ? money(p.amount) : "Incluso") + '</b></div><p class="lead small">Importi di esempio. Nel prototipo non si inseriscono dati di carte.</p>';
+  if (!p.paid && p.amount > 0) h += '<button class="btn primary" data-a="pay" data-id="' + esc(p.id) + '">Paga ora (simulato)</button>';
+  else if (p.amount > 0) h += '<button class="btn sm ghost" data-a="download">Scarica la fattura</button>';
+  h += "</div>";
+  h += '<div class="card"><div class="row between"><span class="mono">Documenti</span><label class="btn sm ghost"><input type="file" hidden data-ctx="extra" data-p="' + esc(p.id) + '">Aggiungi un documento</label></div>';
+  p.docs.forEach(function (d) {
+    h += '<div class="doc-row"><div><div>' + esc(d.label) + '</div><div class="fname">' + esc(d.file) + '</div></div><div class="row">' + docChip(d.state);
+    if (d.state === "da integrare") h += '<label class="btn sm"><input type="file" hidden data-ctx="pratica" data-p="' + esc(p.id) + '" data-doc="' + d.id + '">Sostituisci</label>';
+    h += "</div></div>";
+  });
+  h += "</div>";
+  if (p.status !== "Inviata") h += '<div class="card stack-s"><span class="mono">Parla con noi</span><div class="row"><button class="btn primary" data-a="book-new" data-id="' + esc(p.id) + '">Prenota una chiamata</button><button class="btn" data-a="join-now" data-id="' + esc(p.id) + '">Videochiamata ora</button></div></div>';
+  h += messagesBlock(p, "cliente");
+  if (p.status === "Inviata") {
+    h += '<div class="card stack-s"><span class="mono">Com\'è andata?</span><div class="stars" role="group" aria-label="Valutazione">';
+    for (var i = 1; i <= 5; i++) h += '<button data-a="rate" data-n="' + i + '" data-id="' + esc(p.id) + '" aria-pressed="' + (p.rating === i) + '" aria-label="' + i + ' su 5">' + i + "</button>";
+    h += '</div>' + (p.rating ? '<p class="lead small">Grazie per la valutazione.</p>' : "") + "</div>";
+  }
+  return h + "</div>";
+}
+function cAgenda() {
+  var list = myAppts().sort(function (a, b) { return (a.day + a.time) < (b.day + b.time) ? -1 : 1; });
+  var h = '<section class="hero"><span class="mono">Appuntamenti</span><h2>Agenda</h2></section><div class="stack"><button class="btn primary block" data-a="book-new">Prenota un appuntamento</button><div class="card flat">';
+  if (!list.length) h += '<p class="empty" style="padding:16px 0">Nessun appuntamento.</p>';
+  list.forEach(function (a) { h += apptRow(a, true); });
+  return h + '</div><div class="card stack-s"><span class="mono">Promemoria</span><div class="setting"><span>Avvisami 1 ora prima</span>' + sw("push") + "</div></div></div>";
+}
+function cBook() {
+  var b = S.book, h = '<div class="stack" style="padding-top:12px">' + backBtn() + '<div class="stack-s"><span class="mono">' + (b.replaceId ? "Sposta appuntamento" : "Nuovo appuntamento") + "</span><h2>Scegli giorno e ora</h2></div>";
+  h += '<div class="days" role="group" aria-label="Giorni">';
+  for (var i = 1; i <= 8; i++) { var iso = plusDays(i), dp = dayParts(iso); h += '<button class="pick" data-a="book-day" data-d="' + iso + '" aria-pressed="' + (b.day === iso) + '">' + esc(dp.w) + "<br><b>" + dp.n + "</b> " + esc(dp.m) + "</button>"; }
+  h += "</div>";
+  if (b.day) {
+    h += '<div class="slots" role="group" aria-label="Orari">';
+    SLOTS.forEach(function (t) { var taken = slotTaken(b.day, t, b.replaceId); h += '<button class="pick" data-a="book-time" data-t="' + t + '"' + (taken ? " disabled" : "") + ' aria-pressed="' + (b.time === t) + '">' + t + "</button>"; });
+    h += "</div>";
+  } else h += '<p class="lead small">Scegli prima un giorno.</p>';
+  h += '<div class="stack-s"><span class="mono">Come vuoi essere contattata?</span><div class="seg full" role="group" aria-label="Canale">';
+  Object.keys(CHANNELS).forEach(function (k) { h += '<button data-a="book-ch" data-c="' + k + '" aria-pressed="' + (b.channel === k) + '">' + CHANNELS[k] + "</button>"; });
+  h += '</div></div><label class="lbl">Di cosa vuoi parlare?<select class="field" data-a-change="book-topic" id="book-topic">';
+  ["Dubbi sul 730", "Documenti da integrare", "ISEE e bonus", "Partita IVA", "Altro"].forEach(function (t) { h += "<option" + (b.topic === t ? " selected" : "") + ">" + t + "</option>"; });
+  h += "</select></label>";
+  var mine = myPratiche().filter(function (p) { return p.status !== "Inviata"; });
+  if (mine.length) { h += '<label class="lbl">Pratica collegata<select class="field" data-a-change="book-pratica" id="book-pratica"><option value="">Nessuna</option>'; mine.forEach(function (p) { h += '<option value="' + esc(p.id) + '"' + (b.praticaId === p.id ? " selected" : "") + ">" + esc(PROFILES[p.profile].name) + "</option>"; }); h += "</select></label>"; }
+  return h + '<button class="btn primary" data-a="book-confirm"' + (b.day && b.time ? "" : " disabled") + ">Conferma</button></div>";
+}
+function cDocs() {
+  var list = S.docs.filter(function (d) { return !S.qd || d.name.toLowerCase().indexOf(S.qd.toLowerCase()) >= 0 || d.cat.toLowerCase().indexOf(S.qd.toLowerCase()) >= 0; });
+  var h = '<section class="hero"><span class="mono">Il tuo archivio</span><h2>Cassetto documenti</h2><p class="lead">Carica una volta, riusa in ogni pratica.</p></section><div class="stack">';
+  h += '<input class="field" type="text" id="qd" data-i="qd" placeholder="Cerca per nome o categoria" aria-label="Cerca nei documenti" value="' + esc(S.qd) + '">';
+  h += '<div class="row"><label class="btn primary"><input type="file" hidden data-ctx="cassetto">Aggiungi un file</label><label class="btn"><input type="file" hidden accept="image/*" capture="environment" data-ctx="cassetto">Scatta una foto</label></div><div class="card flat">';
+  if (!list.length) h += '<p class="empty" style="padding:16px 0">Nessun documento trovato.</p>';
+  list.forEach(function (d) {
+    var exp = d.exp ? Math.round((new Date(d.exp + "T12:00:00") - new Date()) / 86400000) : null;
+    h += '<div class="doc-row"><div><div>' + esc(d.name) + '</div><div class="fname">' + esc(d.cat) + " · " + d.year + "</div></div><div class=\"row\">" +
+      (exp !== null && exp < 90 ? '<span class="chip warn">scade tra ' + exp + " giorni</span>" : "") + '<button class="row-btn bad" data-a="doc-del" data-id="' + d.id + '" aria-label="Elimina ' + esc(d.name) + '">Elimina</button></div></div>';
+  });
+  return h + "</div></div>";
+}
+function cMore() {
+  var items = [["profile", "Profilo e famiglia", "Dati personali, familiari a carico"], ["services", "Servizi", "Tutte le pratiche che puoi avviare"], ["deadlines", "Scadenzario", "Promemoria fiscali"], ["sim", "Simulatore detrazioni", "Stima indicativa"], ["assistant", "Assistente e FAQ", "Risposte rapide"], ["invite", "Invita un amico", "Il tuo codice"], ["prefs", "Notifiche", "Canali e promemoria"], ["privacy", "Privacy e consensi", "Dati, esportazione, cancellazione"], ["security", "Sicurezza", "Accesso e sessioni"], ["settings", "Impostazioni", "Tema, testo, lingua"], ["support", "Assistenza e feedback", "Scrivici o valutaci"]];
+  var h = '<section class="hero"><span class="mono">Altro</span><h2>Il tuo spazio</h2></section><div class="card flat menu">';
+  items.forEach(function (i) { h += '<button data-a="go" data-s="' + i[0] + '"><span>' + i[1] + '<br><span class="lead">' + i[2] + "</span></span><span aria-hidden=\"true\">&rsaquo;</span></button>"; });
+  return h + '</div><button class="btn block" style="margin-top:16px" data-a="logout">Esci</button>';
+}
+function sw(key, label) { return '<label class="sw"><input type="checkbox" data-t="' + key + '"' + (S.flags[key] ? " checked" : "") + ' aria-label="' + esc(label || key) + '"><span></span></label>'; }
+function cProfile() {
+  var h = '<div class="stack" style="padding-top:12px">' + backBtn() + '<h2>Profilo e famiglia</h2><form class="card stack-s" data-form="profile"><span class="mono">I tuoi dati</span>' +
+    '<label class="lbl">Nome e cognome<input class="field" name="nome" value="' + esc(S.me.nome) + '"></label><label class="lbl">Email<input class="field" name="email" type="email" value="' + esc(S.me.email) + '"></label><label class="lbl">Telefono<input class="field" name="tel" value="' + esc(S.me.tel) + '"></label><button class="btn primary" type="submit">Salva</button></form>';
+  h += '<div class="card stack-s"><span class="mono">Familiari</span>';
+  if (!S.family.length) h += '<p class="empty">Nessun familiare aggiunto.</p>';
+  S.family.forEach(function (f, i) { h += '<div class="row between"><div><b>' + esc(f.name) + '</b><div class="fname">' + esc(f.rel) + '</div></div><button class="row-btn bad" data-a="fam-del" data-i="' + i + '">Rimuovi</button></div>'; });
+  h += '<form class="stack-s" data-form="fam"><label class="lbl">Nome<input class="field" name="name" required></label><label class="lbl">Relazione<select class="field" name="rel"><option>Coniuge</option><option>Figlio</option><option>Genitore a carico</option><option>Altro</option></select></label><button class="btn" type="submit">Aggiungi familiare</button></form><p class="lead small">I familiari servono per il 730 congiunto, l\'ISEE e le detrazioni per carichi di famiglia.</p></div>';
+  return h + "</div>";
+}
+function cDeadlines() {
+  var h = '<div class="stack" style="padding-top:12px">' + backBtn() + '<div class="stack-s"><h2>Scadenzario</h2><p class="lead small">Date di riferimento di esempio: verificale con il partner abilitato.</p></div><div class="card flat">';
+  deadlines().forEach(function (d) { h += '<div class="setting"><div><b>' + esc(d.name) + '</b><div class="fname">' + esc(d.date) + ' · tra ' + d.when + ' giorni</div></div>' + sw(d.flag, "Promemoria " + d.name) + "</div>"; });
+  return h + "</div></div>";
+}
+function cSim() {
+  var v = parseFloat(String(S.sim).replace(",", ".")), ok = !isNaN(v) && v >= 0, det = ok ? Math.max(0, v - 129.11) * 0.19 : 0;
+  return '<div class="stack" style="padding-top:12px">' + backBtn() + '<div class="stack-s"><h2>Simulatore detrazioni</h2><p class="lead">Stima delle spese mediche detraibili al 19%, oltre la franchigia di 129,11 euro.</p></div>' +
+    '<label class="lbl">Spese mediche dell\'anno (euro)<input class="field" id="sim" type="text" inputmode="decimal" data-i="sim" value="' + esc(S.sim) + '" placeholder="Per esempio 450"></label>' +
+    '<div class="card stack-s"><span class="mono">Stima</span><div class="row between"><span>Detrazione indicativa</span><b>' + (ok ? money(Math.round(det * 100) / 100) : "—") + '</b></div><p class="lead small">È una stima: l\'importo reale dipende dal reddito, dalle altre voci e dalle regole in vigore.</p></div>' +
+    '<button class="btn" data-a="go" data-s="services">Avvia una pratica</button></div>';
+}
+var BOT = [
+  [/document|carica|serve/, "La lista dipende dalla tua situazione: avvia una pratica da Servizi e rispondi alle domande, ti diciamo cosa caricare."],
+  [/quanto|prezzo|cost|pag/, "Il preventivo compare prima dell'invio e nella pratica. Nel prototipo gli importi sono di esempio."],
+  [/temp|quando|giorni|quanto ci vuole/, "Dopo l'invio un operatore controlla i documenti. Puoi seguire ogni passaggio in Pratiche."],
+  [/rimbors|detraz|sconto/, "L'importo dipende dai dati della dichiarazione. Usa il simulatore per una stima indicativa."],
+  [/privacy|dati|cancell|esport/, "Trattiamo i dati solo con il tuo consenso. Da Privacy e consensi puoi esportarli o chiederne la cancellazione."],
+  [/video|chiamat|appuntament|parlare/, "Puoi prenotare una videochiamata, una telefonata o un appuntamento in sede dall'Agenda."],
+  [/isee|bonus|assegno/, "Per ISEE e bonus scegli Famiglia in Servizi: ti guidiamo nella raccolta dei documenti."]
+];
+function cAssistant() {
+  var h = '<div class="stack" style="padding-top:12px">' + backBtn() + '<h2>Assistente e FAQ</h2><div class="card stack-s"><div class="msgs" aria-live="polite">';
+  S.assist.forEach(function (m) { h += '<div class="msg' + (m.from === "me" ? " me" : "") + '">' + esc(m.text) + "</div>"; });
+  h += '</div><form class="composer" data-form="assist"><input type="text" name="t" id="assist-q" placeholder="Scrivi una domanda" aria-label="Domanda all\'assistente" autocomplete="off"><button class="btn primary" type="submit">Invia</button></form><div class="row">';
+  ["Quali documenti servono?", "Quanto costa?", "Quanto ci vuole?"].forEach(function (q) { h += '<button class="row-btn" data-a="assist-ask" data-q="' + esc(q) + '">' + esc(q) + "</button>"; });
+  h += '</div></div><div class="card"><span class="mono">Domande frequenti</span>';
+  [["Devo andare di persona?", "No. Puoi fare tutto da qui, con una videochiamata se vuoi parlare con qualcuno."], ["I miei documenti sono al sicuro?", "Nel prodotto reale saranno cifrati e accessibili solo a chi lavora alla tua pratica."], ["Posso fare il 730 insieme al coniuge?", "Sì, aggiungilo tra i familiari: lo chiederemo nella pratica."], ["Cosa succede se manca un documento?", "L'operatore te lo chiede nella pratica e tu lo carichi di nuovo."]].forEach(function (f) { h += '<details class="faq"><summary>' + f[0] + "</summary><p>" + f[1] + "</p></details>"; });
+  return h + "</div></div>";
+}
+function cInvite() {
+  return '<div class="stack" style="padding-top:12px">' + backBtn() + '<h2>Invita un amico</h2><div class="card stack-s"><span class="mono">Il tuo codice</span><div class="row between"><b style="font-family:var(--mono);font-size:1.3rem">QUADRA-DEMO26</b><button class="btn sm" data-a="copy">Copia</button></div><p class="lead small">Chi si iscrive con il tuo codice ottiene un vantaggio di esempio, e anche tu.</p></div><div class="tiles"><div class="tile"><b>' + S.invited + '</b><span class="mono">Amici invitati</span></div><div class="tile"><b>' + (S.invited * 5) + ' €</b><span class="mono">Credito di esempio</span></div></div></div>';
+}
+function cPrefs() {
+  return '<div class="stack" style="padding-top:12px">' + backBtn() + '<h2>Notifiche</h2><div class="card flat">' +
+    [["push", "Notifiche push"], ["email", "Email"], ["sms", "SMS"], ["marketing", "Novità e promozioni"]].map(function (x) { return '<div class="setting"><span>' + x[1] + "</span>" + sw(x[0], x[1]) + "</div>"; }).join("") + "</div></div>";
+}
+function cPrivacy() {
+  var h = '<div class="stack" style="padding-top:12px">' + backBtn() + '<h2>Privacy e consensi</h2><div class="card flat"><div class="setting"><div><b>Trattamento dei dati fiscali</b><div class="fname">Necessario per fornire il servizio</div></div>' + sw("dati", "Trattamento dei dati fiscali") + '</div><div class="setting"><div><b>Condivisione con il partner abilitato</b><div class="fname">Necessaria per inviare le pratiche</div></div>' + sw("partner", "Condivisione con il partner") + '</div><div class="setting"><div><b>Comunicazioni commerciali</b><div class="fname">Facoltativo</div></div>' + sw("marketing", "Comunicazioni commerciali") + '</div></div>';
+  h += '<label class="lbl">Conserva i miei documenti per<select class="field" data-a-change="retention" id="retention"><option value="5"' + (S.retention === "5" ? " selected" : "") + '>5 anni</option><option value="10"' + (S.retention === "10" ? " selected" : "") + '>10 anni</option></select></label>';
+  h += '<div class="card stack-s"><span class="mono">I tuoi diritti</span><button class="btn" data-a="export">Esporta i miei dati</button>';
+  if (S.deleteStep === 0) h += '<button class="btn danger" data-a="delete1">Elimina il mio account</button>';
+  else h += '<p class="small">Sei sicura? Le pratiche aperte verranno chiuse e i dati cancellati.</p><div class="row"><button class="btn danger" data-a="delete2">Sì, elimina</button><button class="btn" data-a="delete0">Annulla</button></div>';
+  return h + "</div></div>";
+}
+function cSecurity() {
+  var h = '<div class="stack" style="padding-top:12px">' + backBtn() + '<h2>Sicurezza</h2><div class="card flat"><div class="setting"><div><b>Verifica in due passaggi</b><div class="fname">Codice SMS a ogni accesso</div></div>' + sw("tfa", "Verifica in due passaggi") + '</div></div><div class="card"><span class="mono">Sessioni attive</span>';
+  S.sessions.forEach(function (s) { h += '<div class="doc-row"><div><b>' + esc(s.dev) + '</b><div class="fname">' + esc(s.when) + "</div></div>" + (s.here ? '<span class="chip ok">Questa</span>' : '<button class="row-btn bad" data-a="sess-out" data-id="' + s.id + '">Disconnetti</button>') + "</div>"; });
+  return h + '</div><div class="card stack-s"><span class="mono">Metodo di accesso</span><div class="row"><button class="btn sm">SPID</button><button class="btn sm ghost">CIE</button><button class="btn sm ghost">Email e password</button></div></div></div>';
+}
+function cSettings() {
+  var h = '<div class="stack" style="padding-top:12px">' + backBtn() + '<h2>Impostazioni</h2><div class="card stack-s"><span class="mono">Tema</span><div class="seg full" role="group" aria-label="Tema">';
+  [["system", "Sistema"], ["light", "Chiaro"], ["dark", "Scuro"]].forEach(function (t) { h += '<button data-a="theme" data-v="' + t[0] + '" aria-pressed="' + (S.theme === t[0]) + '">' + t[1] + "</button>"; });
+  h += '</div></div><div class="card stack-s"><span class="mono">Dimensione del testo</span><div class="seg full" role="group" aria-label="Dimensione del testo">';
+  [[100, "Normale"], [112, "Grande"], [125, "Molto grande"]].forEach(function (t) { h += '<button data-a="fs" data-v="' + t[0] + '" aria-pressed="' + (S.fs === t[0]) + '">' + t[1] + "</button>"; });
+  h += '</div></div><div class="card stack-s"><span class="mono">Lingua</span><div class="seg full" role="group" aria-label="Lingua">';
+  [["it", "Italiano"], ["en", "English"], ["es", "Español"]].forEach(function (t) { h += '<button data-a="lang" data-v="' + t[0] + '" aria-pressed="' + (S.lang === t[0]) + '">' + t[1] + "</button>"; });
+  return h + '</div><p class="lead small">Nel prototipo la scelta viene solo registrata: la traduzione arriva con la versione reale.</p></div></div>';
+}
+function cSupport() {
+  var h = '<div class="stack" style="padding-top:12px">' + backBtn() + '<h2>Assistenza e feedback</h2><form class="card stack-s" data-form="support"><span class="mono">Scrivici</span><label class="lbl">Argomento<input class="field" name="s" required></label><label class="lbl">Messaggio<textarea class="field" name="b" required></textarea></label><button class="btn primary" type="submit">Invia la richiesta</button></form>';
+  if (S.tickets.length) { h += '<div class="card"><span class="mono">Le tue richieste</span>'; S.tickets.forEach(function (t) { h += '<div class="doc-row"><div><b>' + esc(t.s) + '</b><div class="fname">' + esc(t.when) + '</div></div><span class="chip neutral">Aperta</span></div>'; }); h += "</div>"; }
+  h += '<div class="card stack-s"><span class="mono">Valuta Quadra</span><div class="stars" role="group" aria-label="Valutazione del servizio">';
+  for (var i = 1; i <= 5; i++) h += '<button data-a="rate-app" data-n="' + i + '" aria-pressed="' + (S.rating === i) + '" aria-label="' + i + ' su 5">' + i + "</button>";
+  return h + "</div></div></div>";
+}
+function cNotif() {
+  var h = '<div class="stack" style="padding-top:12px">' + backBtn() + '<div class="row between"><h2>Avvisi</h2><button class="btn sm ghost" data-a="read-all">Segna come letti</button></div><div class="card flat">';
+  if (!S.notifs.length) h += '<p class="empty" style="padding:16px 0">Nessun avviso.</p>';
+  S.notifs.forEach(function (n) { h += '<div class="doc-row"><div><div>' + esc(n.text) + '</div><div class="fname">' + esc(n.time) + "</div></div>" + (n.read ? "" : '<span class="chip cur">Nuovo</span>') + "</div>"; });
+  return h + "</div></div>";
+}
+
+/* ============ operatore ============ */
+function viewOp() {
+  var tabs = [["pratiche", "Pratiche"], ["agenda", "Agenda"], ["clienti", "Clienti"], ["incassi", "Incassi e listino"], ["report", "Report"], ["team", "Team"]];
+  var body = ({ pratiche: oPratiche, agenda: oAgenda, clienti: oClienti, incassi: oIncassi, report: oReport, team: oTeam })[S.opTab]();
+  return '<div class="wrap wide"><div class="row between" style="padding-top:16px"><div class="stack-s"><span class="mono">Pannello operatore</span></div><span class="chip neutral">Accesso come ' + esc(curUser().name) + "</span></div><nav class=\"optabs\" aria-label=\"Sezioni operatore\">" +
+    tabs.map(function (t) { return '<button data-a="optab" data-t="' + t[0] + '"' + (S.opTab === t[0] ? ' aria-current="page"' : "") + ">" + t[1] + "</button>"; }).join("") + "</nav><div class=\"stack\" style=\"padding-top:12px\">" + body + "</div></div>";
+}
+function oPratiche() {
+  var list = S.inbox, cnt = { work: 0, fix: 0, sign: 0 };
+  list.forEach(function (p) { if (p.status === "Ricevuta" || p.status === "In verifica") cnt.work++; if (p.status === "Da integrare") cnt.fix++; if (p.status === "Pronta per la firma") cnt.sign++; });
+  var q = S.q.toLowerCase();
+  var shown = list.filter(function (p) {
+    if (q && (p.name + p.id).toLowerCase().indexOf(q) < 0) return false;
+    if (S.filter === "work") return p.status === "Ricevuta" || p.status === "In verifica";
+    if (S.filter === "fix") return p.status === "Da integrare";
+    if (S.filter === "sign") return p.status === "Pronta per la firma";
+    return true;
+  });
+  var sel = getP(S.opSel);
+  var h = '<div class="tiles"><div class="tile"><b>' + cnt.work + '</b><span class="mono">Da lavorare</span></div><div class="tile"><b>' + cnt.fix + '</b><span class="mono">Da integrare</span></div><div class="tile"><b>' + cnt.sign + '</b><span class="mono">Per la firma</span></div></div><div class="op-grid"><div class="stack-s">' +
+    '<input class="field" type="text" id="qp" data-i="qp" placeholder="Cerca per cliente o numero" aria-label="Cerca pratiche" value="' + esc(S.q) + '"><div class="filters" role="group" aria-label="Filtra le pratiche">';
+  [["all", "Tutte"], ["work", "Da lavorare"], ["fix", "Da integrare"], ["sign", "Per la firma"]].forEach(function (f) { h += '<button data-a="filter" data-f="' + f[0] + '" aria-pressed="' + (S.filter === f[0]) + '">' + f[1] + "</button>"; });
+  h += "</div>" + (shown.length ? "" : '<p class="empty">Nessuna pratica trovata.</p>');
+  shown.forEach(function (p) {
+    var cls = p.status === "Da integrare" ? "s-warn" : (p.status === "Pronta per la firma" || p.status === "Inviata" ? "s-ok" : "s-cur"), toCheck = p.docs.filter(function (d) { return d.state === "caricato"; }).length;
+    h += '<button class="pcard ' + cls + '" data-a="op-open" data-id="' + esc(p.id) + '" aria-current="' + (p.id === S.opSel) + '"><div class="row between"><b>' + esc(p.name) + "</b>" + statusChip(p.status) + '</div><div class="row between"><span class="mono">' + esc(p.id) + " · " + esc(PROFILES[p.profile].tag) + '</span><span class="fname">' + (toCheck ? toCheck + " da controllare" : esc(p.assignee)) + "</span></div></button>";
+  });
+  return h + "</div><div>" + (sel ? opDetail(sel) : '<div class="card"><p class="empty">Scegli una pratica per vedere i documenti.</p></div>') + "</div></div>";
+}
+function opDetail(p) {
+  var h = '<div class="stack"><div class="card stack-s"><div class="row between"><div><span class="mono">' + esc(p.id) + " · " + esc(PROFILES[p.profile].name) + "</span><h3>" + esc(p.name) + "</h3></div>" + statusChip(p.status) + "</div>" +
+    '<div class="row"><label class="lbl" style="flex:1">Assegnata a<select class="field" data-a-change="assign" id="assign">' + team.map(function (t) { return "<option" + (t.name === p.assignee ? " selected" : "") + ">" + esc(t.name) + "</option>"; }).join("") + "</select></label></div>" +
+    '<span class="mono">Cambia stato</span><div class="stepper">';
+  STATUS_LIST.forEach(function (s) { h += '<button class="row-btn' + (s === p.status ? " cur" : "") + '" data-a="op-status" data-s="' + esc(s) + '">' + esc(s) + "</button>"; });
+  h += '</div><div class="row"><span class="chip ' + (p.visto ? "ok" : "warn") + '">' + (p.visto ? "Visto applicato" : "Visto mancante") + '</span><span class="chip ' + (p.signed ? "ok" : "neutral") + '">' + (p.signed ? "Firmata dal cliente" : "Non ancora firmata") + '</span><span class="chip ' + (p.paid || !p.amount ? "ok" : "warn") + '">' + (p.paid || !p.amount ? "Pagata" : "Da incassare") + "</span></div>" +
+    '<div class="row"><button class="btn sm" data-a="op-visto">' + (p.visto ? "Rimuovi il visto" : "Applica il visto di conformità") + '</button><button class="btn sm" data-a="op-call" data-id="' + esc(p.id) + '">Videochiamata</button><button class="btn sm ghost" data-a="op-export">Esporta verso il CAF partner</button></div>' + (p.protocol ? '<div class="row between"><span class="mono">Protocollo</span><b>' + esc(p.protocol) + "</b></div>" : "") + "</div>";
+  h += '<div class="card"><span class="mono">Documenti</span>';
+  p.docs.forEach(function (d) {
+    h += '<div class="doc-row"><div><div>' + esc(d.label) + '</div><div class="fname">' + esc(d.file) + '</div></div><div class="row">' + docChip(d.state) + '<button class="row-btn ok" data-a="op-approve" data-d="' + d.id + '">Approva</button><button class="row-btn bad" data-a="op-ask" data-d="' + d.id + '">Richiedi</button></div>';
+    if (S.reasonFor === d.id) { h += '<div class="reasons"><span class="mono" style="align-self:center">Motivo</span>'; REASONS.forEach(function (r) { h += '<button class="row-btn" data-a="op-reason" data-d="' + d.id + '" data-r="' + esc(r) + '">' + esc(r) + "</button>"; }); h += "</div>"; }
+    h += "</div>";
+  });
+  h += "</div>" + messagesBlock(p, "operatore");
+  h += '<div class="card stack-s"><span class="mono">Note interne (non visibili al cliente)</span>';
+  if (!p.notes.length) h += '<p class="empty">Nessuna nota.</p>';
+  p.notes.forEach(function (n) { h += '<div class="msg">' + esc(n) + "</div>"; });
+  h += '<form class="composer" data-form="note"><input type="text" name="t" id="note" placeholder="Aggiungi una nota" aria-label="Nota interna" autocomplete="off"><button class="btn" type="submit">Salva</button></form></div>';
+  h += '<div class="card"><span class="mono">Registro attività</span><ol class="tl" style="margin-top:12px">';
+  p.audit.slice().reverse().slice(0, 8).forEach(function (a) { h += '<li class="done"><span class="dot" aria-hidden="true">&#10003;</span><div><span class="t">' + esc(a.x) + '</span><div class="fname">' + esc(a.t) + "</div></div></li>"; });
+  return h + "</ol></div></div>";
+}
+function oAgenda() {
+  var list = S.appts.slice().sort(function (a, b) { return (a.day + a.time) < (b.day + b.time) ? -1 : 1; });
+  var h = '<div class="stack-s"><h2>Agenda</h2><p class="lead small">Tutti gli appuntamenti del team.</p></div><div class="card flat">';
+  if (!list.length) h += '<p class="empty" style="padding:16px 0">Nessun appuntamento.</p>';
+  list.forEach(function (a) {
+    var d = dayParts(a.day);
+    h += '<div class="appt"><div class="dayb">' + esc(d.w) + "<b>" + d.n + "</b>" + esc(d.m) + '</div><div><b>' + esc(a.time) + " · " + esc(a.who) + '</b><div class="fname">' + esc(CHANNELS[a.channel]) + " · " + esc(a.topic || "") + " · con " + esc(a.with) + "</div><span class=\"chip " + (a.status === "confermato" ? "cur" : "neutral") + '">' + esc(a.status) + '</span></div><div class="stack-s">';
+    if (a.status === "confermato") {
+      if (a.channel === "video") h += '<button class="btn sm primary" data-a="op-join" data-id="' + a.id + '">Avvia</button>';
+      h += '<button class="row-btn ok" data-a="appt-done" data-id="' + a.id + '">Svolto</button><button class="row-btn bad" data-a="appt-cancel-op" data-id="' + a.id + '">Annulla</button>';
+    }
+    h += "</div></div>";
+  });
+  return h + "</div>";
+}
+function oClienti() {
+  var list = clientsList().filter(function (c) { return !S.qc || c.name.toLowerCase().indexOf(S.qc.toLowerCase()) >= 0; });
+  var sel = S.clientSel && clientsList().filter(function (c) { return c.name === S.clientSel; })[0];
+  var h = '<div class="stack-s"><h2>Clienti</h2></div><div class="op-grid"><div class="stack-s"><input class="field" type="text" id="qc" data-i="qc" placeholder="Cerca un cliente" aria-label="Cerca clienti" value="' + esc(S.qc) + '">';
+  list.forEach(function (c) { h += '<button class="pcard" data-a="client-open" data-n="' + esc(c.name) + '" aria-current="' + (S.clientSel === c.name) + '"><div class="row between"><b>' + esc(c.name) + '</b><span class="chip neutral">' + esc(c.tag) + '</span></div><span class="fname">' + c.n + " pratiche</span></button>"; });
+  h += "</div><div>";
+  if (!sel) h += '<div class="card"><p class="empty">Scegli un cliente per vedere contatti e pratiche.</p></div>';
+  else {
+    var slug = sel.name.toLowerCase().replace(/[^a-z]/g, "");
+    h += '<div class="stack"><div class="card stack-s"><div class="row"><div class="avatar">' + esc(initials(sel.name)) + '</div><div><h3>' + esc(sel.name) + '</h3><span class="chip neutral">' + esc(sel.tag) + '</span></div></div><div class="fname">' + esc(slug) + "@esempio.it · +39 000 0000000</div></div>";
+    h += '<div class="card"><span class="mono">Pratiche</span>';
+    var ps = S.inbox.filter(function (p) { return p.name === sel.name; });
+    if (!ps.length) h += '<p class="empty">Nessuna pratica.</p>';
+    ps.forEach(function (p) { h += '<div class="doc-row"><div><b>' + esc(PROFILES[p.profile].name) + '</b><div class="fname">' + esc(p.id) + "</div></div>" + statusChip(p.status) + "</div>"; });
+    h += '</div><div class="card stack-s"><span class="mono">Note sul cliente</span><textarea class="field" id="cn" data-i="cn" aria-label="Note sul cliente">' + esc(S.clientNotes[sel.name] || "") + "</textarea></div></div>";
+  }
+  return h + "</div></div>";
+}
+function oIncassi() {
+  var paid = 0, due = 0;
+  S.inbox.forEach(function (p) { if (p.amount) { if (p.paid) paid += p.amount; else due += p.amount; } });
+  var h = '<div class="stack-s"><h2>Incassi e listino</h2></div><div class="tiles"><div class="tile"><b>' + money(paid) + '</b><span class="mono">Incassato</span></div><div class="tile"><b>' + money(due) + '</b><span class="mono">Da incassare</span></div></div>';
+  h += '<div class="card tscroll"><table><thead><tr><th>Pratica</th><th>Cliente</th><th>Importo</th><th>Stato</th><th></th></tr></thead><tbody>';
+  S.inbox.filter(function (p) { return p.amount; }).forEach(function (p) {
+    h += "<tr><td>" + esc(p.id) + "</td><td>" + esc(p.name) + "</td><td>" + money(p.amount) + '</td><td><span class="chip ' + (p.paid ? "ok" : "warn") + '">' + (p.paid ? "Pagato" : "Da incassare") + "</span></td><td>" + (p.paid ? "" : '<button class="row-btn" data-a="op-paid" data-id="' + esc(p.id) + '">Segna incassato</button>') + "</td></tr>";
+  });
+  h += '</tbody></table></div><div class="card stack-s"><span class="mono">Listino (importi di esempio, validi per le nuove pratiche)</span>';
+  Object.keys(PROFILES).forEach(function (k) { h += '<label class="lbl row between" style="flex-direction:row"><span>' + esc(PROFILES[k].name) + '</span><input class="field" style="width:110px" type="number" min="0" step="1" id="pr-' + k + '" data-i="price:' + k + '" value="' + priceOf(k) + '" aria-label="Prezzo ' + esc(PROFILES[k].name) + '"></label>'; });
+  return h + "</div>";
+}
+function oReport() {
+  var counts = {}, rated = [], total = S.inbox.length;
+  STATUS_LIST.forEach(function (s) { counts[s] = 0; });
+  S.inbox.forEach(function (p) { counts[p.status]++; if (p.rating) rated.push(p.rating); });
+  var avg = rated.length ? (rated.reduce(function (a, b) { return a + b; }, 0) / rated.length).toFixed(1).replace(".", ",") : "—";
+  var h = '<div class="stack-s"><h2>Report</h2></div><div class="tiles"><div class="tile"><b>' + total + '</b><span class="mono">Pratiche</span></div><div class="tile"><b>2,4 gg</b><span class="mono">Tempo medio (esempio)</span></div><div class="tile"><b>' + avg + '</b><span class="mono">Valutazione media</span></div></div>';
+  h += '<div class="card stack-s"><span class="mono">Pratiche per stato</span><div class="bars">';
+  STATUS_LIST.forEach(function (s) { h += '<div class="bar"><span>' + esc(s) + '</span><i style="width:' + Math.round(counts[s] / Math.max(total, 1) * 100) + '%"></i><b>' + counts[s] + "</b></div>"; });
+  h += '</div></div><div class="card stack-s"><span class="mono">Pratiche per servizio</span><div class="bars">';
+  Object.keys(PROFILES).forEach(function (k) { var n = S.inbox.filter(function (p) { return p.profile === k; }).length; if (n) h += '<div class="bar"><span>' + esc(PROFILES[k].name) + '</span><i style="width:' + Math.round(n / Math.max(total, 1) * 100) + '%"></i><b>' + n + "</b></div>"; });
+  return h + '</div></div><p class="lead small">Tempo medio e storico mensile sono dati di esempio; il resto è calcolato sulle pratiche del prototipo.</p>';
+}
+function oTeam() {
+  var h = '<div class="stack-s"><h2>Team e permessi</h2></div><div class="card stack-s"><span class="mono">Stai usando come</span><select class="field" data-a-change="op-user" id="op-user">' + team.map(function (t, i) { return '<option value="' + i + '"' + (i === S.opUser ? " selected" : "") + ">" + esc(t.name) + " · " + esc(t.role) + "</option>"; }).join("") + "</select><p class=\"lead small\">Cambia ruolo per vedere come cambiano le azioni consentite, per esempio il visto di conformità.</p></div>";
+  h += '<div class="card"><span class="mono">Persone</span>';
+  team.forEach(function (t) { var n = S.inbox.filter(function (p) { return p.assignee === t.name && p.status !== "Inviata"; }).length; h += '<div class="doc-row"><div class="row"><div class="avatar">' + esc(initials(t.name)) + '</div><div><b>' + esc(t.name) + '</b><div class="fname">' + esc(t.role) + '</div></div></div><span class="chip neutral">' + n + " pratiche</span></div>"; });
+  h += '</div><form class="card stack-s" data-form="team"><span class="mono">Aggiungi una persona</span><label class="lbl">Nome<input class="field" name="n" required></label><label class="lbl">Ruolo<select class="field" name="r">' + ROLES.map(function (r) { return "<option>" + esc(r) + "</option>"; }).join("") + '</select></label><button class="btn" type="submit">Aggiungi</button></form>';
+  h += '<div class="card tscroll"><span class="mono">Permessi per ruolo</span><table><thead><tr><th>Azione</th>' + ROLES.map(function (r) { return "<th>" + esc(r.split(" ")[0]) + "</th>"; }).join("") + "</tr></thead><tbody>";
+  PERMS.forEach(function (p) { h += "<tr><td>" + esc(p[0]) + "</td>" + p[1].map(function (v) { return "<td>" + (v ? "&#10003;" : "&ndash;") + "</td>"; }).join("") + "</tr>"; });
+  return h + "</tbody></table></div>";
+}
+
+/* ============ videochiamata (simulata) ============ */
+function renderOverlay() {
+  var el = document.getElementById("overlay"), c = S.call;
+  if (!el) return;
+  if (!c) { el.hidden = true; el.innerHTML = ""; return; }
+  el.hidden = false;
+  if (c.phase === "lobby") {
+    el.innerHTML = '<div class="lobby" role="dialog" aria-label="Sala d\'attesa"><span class="mono">Sala d\'attesa</span><h2>Videochiamata con ' + esc(c.counterpart) + '</h2><div class="tile-v"><div class="big-av">' + esc(initials(c.me)) + '</div><span class="tile-name">' + esc(c.me) + (c.cam ? "" : " · camera spenta") + '</span></div><div class="card" style="background:#0F1830;border-color:#25314A"><div class="setting"><span>Microfono</span><label class="sw"><input type="checkbox" data-t="call-mic"' + (c.mic ? " checked" : "") + ' aria-label="Microfono"><span></span></label></div><div class="setting"><span>Camera</span><label class="sw"><input type="checkbox" data-t="call-cam"' + (c.cam ? " checked" : "") + ' aria-label="Camera"><span></span></label></div></div><p class="small" style="color:#9AA8C2">Nel prototipo la videochiamata è simulata: non usa la tua camera né il microfono. Nella versione reale useremo un servizio di videochiamata cifrato.</p><div class="row"><button class="btn primary grow" data-a="call-enter">Entra ora</button><button class="btn" style="background:transparent;color:#EEF2FA;border-color:#3A4868" data-a="call-end">Annulla</button></div></div>';
+    return;
+  }
+  var side = c.chatOpen;
+  el.innerHTML = '<div class="call-top"><div><span class="mono">In chiamata</span><div><b>' + esc(c.counterpart) + '</b></div></div><span class="mono" id="call-timer" aria-label="Durata">' + fmtSecs(c.secs) + "</span></div>" +
+    '<div class="call-stage' + (side ? " has-side" : "") + '"><div class="tile-v">' +
+    (c.share ? '<div class="share-doc" aria-label="Schermo condiviso"><b>' + esc(c.shareTitle) + '</b><div class="ln"></div><div class="ln" style="width:80%"></div><div class="ln" style="width:92%"></div><div class="ln" style="width:60%"></div>' + (c.shareItems || []).map(function (i) { return '<div style="margin-top:8px">&#9633; ' + esc(i) + "</div>"; }).join("") + "</div>" : '<div class="big-av talk">' + esc(initials(c.counterpart)) + "</div>") +
+    '<span class="tile-name">' + esc(c.counterpart) + (c.share ? " · sta condividendo" : "") + '</span><div class="self-v">' + (c.cam ? "<span>Tu<br>(anteprima)</span>" : "Camera spenta") + "</div>" + (c.caps ? '<div class="cap">Sottotitoli di esempio: "Controlliamo insieme i documenti della tua pratica."</div>' : "") + "</div>" +
+    (side ? '<div class="side" aria-label="Chat della chiamata"><div class="msgs">' + (c.chat.length ? c.chat.map(function (m) { return '<div class="msg' + (m.me ? " me" : "") + '">' + esc(m.text) + "</div>"; }).join("") : '<p class="small" style="color:#9AA8C2">Scrivi qui senza interrompere la chiamata.</p>') + '</div><form data-form="call-chat"><input type="text" name="t" id="call-chat-in" aria-label="Messaggio nella chiamata" autocomplete="off" placeholder="Scrivi"><button class="btn sm primary" type="submit">Invia</button></form></div>' : "") + "</div>" +
+    '<div class="ctrls"><button class="ctrl' + (c.mic ? "" : " off") + '" data-a="call-mic" aria-pressed="' + c.mic + '">' + (c.mic ? "Microfono" : "Muto") + '</button><button class="ctrl' + (c.cam ? "" : " off") + '" data-a="call-cam" aria-pressed="' + c.cam + '">' + (c.cam ? "Camera" : "Camera off") + '</button><button class="ctrl" data-a="call-share" aria-pressed="' + c.share + '">' + (c.role === "operatore" ? "Condividi schermo" : "Mostra documento") + '</button><button class="ctrl" data-a="call-caps" aria-pressed="' + c.caps + '">Sottotitoli</button><button class="ctrl" data-a="call-chat" aria-pressed="' + c.chatOpen + '">Chat</button><button class="ctrl end" data-a="call-end">Termina</button></div>';
+}
+function startCall(role, counterpart, p, apptId) {
+  S.call = { phase: "lobby", role: role, counterpart: counterpart, me: role === "operatore" ? curUser().name : "Tu (demo)", mic: true, cam: true, share: false, caps: false, chatOpen: false, chat: [], secs: 0, praticaId: p ? p.id : null, apptId: apptId || null, shareTitle: "", shareItems: [] };
+}
+function endCall() {
+  var c = S.call; if (!c) return;
+  clearInterval(S.timer); S.timer = null;
+  if (c.phase === "live") {
+    var p = c.praticaId && getP(c.praticaId), dur = fmtSecs(c.secs);
+    if (p) { pushMsg(p, "sys", "Videochiamata terminata, durata " + dur + "."); audit(p, "Videochiamata di " + dur); }
+    if (c.apptId) { var a = S.appts.filter(function (x) { return x.id === c.apptId; })[0]; if (a) a.status = "svolto"; }
+    toast("Chiamata terminata, durata " + dur + ".");
+  }
+  S.call = null;
+}
+
+/* ============ azioni ============ */
+function curPratica() { return getP(S.view === "op" ? S.opSel : S.sel); }
+var A = {
+  view: function (d) { S.view = d.v; if (S.view === "op" && !S.opSel && S.inbox.length) S.opSel = S.inbox[0].id; },
+  login: function () { S.authStep = "otp"; },
+  "login-back": function () { S.authStep = "login"; },
+  logout: function () { S.auth = false; S.authStep = "login"; S.screen = null; S.tab = "home"; },
+  tab: function (d) { S.tab = d.t; S.screen = null; },
+  go: function (d) { S.screen = d.s; if (d.s === "notif") { /* resta aperto finché non li segni come letti */ } },
+  back: function () { S.screen = null; },
+  pick: function (d) {
+    S.profile = d.p; S.qi = 0; S.answers = [];
+    if (!PROFILES[d.p].questions.length) { buildDraft(); S.screen = "list"; } else S.screen = "quiz";
+  },
+  answer: function (d) {
+    S.answers[S.qi] = d.v === "1";
+    if (S.qi + 1 < PROFILES[S.profile].questions.length) S.qi++; else { buildDraft(); S.screen = "list"; }
+  },
+  demo: function () { S.draft.forEach(function (x) { if (!x.file) x.file = x.id + "-esempio.pdf"; }); },
+  "from-cassetto": function () {
+    var n = 0; S.draft.forEach(function (x, i) { if (!x.file && S.docs[i % S.docs.length]) { x.file = S.docs[i % S.docs.length].name + ".pdf"; n++; } });
+    toast(n ? n + " documenti presi dal cassetto." : "Niente da compilare.");
+  },
+  submit: function () {
+    var docs = S.draft.map(function (x) { return { id: x.id, label: x.label, file: x.file, state: "caricato" }; });
+    var amt = priceOf(S.profile);
+    var p = { id: "P-" + (++seq), owner: "me", name: "Tu (demo)", profile: S.profile, status: "Ricevuta", due: "tra 20 giorni", assignee: "Davide L.", amount: amt, paid: amt === 0, visto: false, signed: false, protocol: null, rating: 0, docs: docs, messages: [], notes: [], audit: [{ t: "Oggi " + nowT(), x: "Pratica ricevuta" }] };
+    pushMsg(p, "operatore", "Grazie, abbiamo ricevuto la pratica. Ti scriviamo qui se serve qualcosa.");
+    S.inbox.unshift(p); S.sel = p.id; S.screen = "pratica"; S.opSel = p.id;
+    notify("Pratica " + p.id + " ricevuta."); toast("Pratica inviata.");
+  },
+  "open-p": function (d) { S.sel = d.id; S.screen = "pratica"; },
+  pay: function (d) { var p = getP(d.id); if (p) { p.paid = true; audit(p, "Pagamento ricevuto " + money(p.amount)); pushMsg(p, "sys", "Pagamento ricevuto. Grazie."); notify("Pagamento ricevuto per " + p.id + "."); toast("Pagamento simulato completato."); } },
+  sign: function () { var p = curPratica(); if (!p) return; p.signed = true; audit(p, "Firma del cliente (OTP)"); pushMsg(p, "sys", "Firma ricevuta. In attesa del visto e dell'invio."); toast("Firmato."); },
+  rate: function (d) { var p = getP(d.id); if (p) { p.rating = Number(d.n); toast("Grazie per la valutazione."); } },
+  download: function () { toast("Nel prototipo il download è simulato."); },
+  "rate-app": function (d) { S.rating = Number(d.n); toast("Grazie del feedback."); },
+  "book-new": function (d) { S.book = { day: null, time: null, channel: "video", topic: "Dubbi sul 730", praticaId: d && d.id ? d.id : null, replaceId: null }; S.screen = "book"; },
+  "book-day": function (d) { S.book.day = d.d; S.book.time = null; },
+  "book-time": function (d) { S.book.time = d.t; },
+  "book-ch": function (d) { S.book.channel = d.c; },
+  "book-confirm": function () {
+    var b = S.book; if (!b.day || !b.time) return;
+    if (b.replaceId) { var o = S.appts.filter(function (a) { return a.id === b.replaceId; })[0]; if (o) o.status = "spostato"; }
+    var a = { id: "A-" + (++seq), owner: "me", who: "Tu (demo)", day: b.day, time: b.time, channel: b.channel, topic: b.topic || "Appuntamento", with: "Chiara M.", status: "confermato" };
+    S.appts.push(a); notify("Appuntamento confermato: " + dayLabel(a.day) + " alle " + a.time + "."); toast("Appuntamento confermato."); S.screen = null; S.tab = "agenda";
+  },
+  "appt-move": function (d) { var a = S.appts.filter(function (x) { return x.id === d.id; })[0]; if (!a) return; S.book = { day: null, time: null, channel: a.channel, topic: a.topic, praticaId: null, replaceId: a.id }; S.screen = "book"; },
+  "appt-cancel": function (d) { var a = S.appts.filter(function (x) { return x.id === d.id; })[0]; if (a) { a.status = "annullato"; toast("Appuntamento annullato."); } },
+  join: function (d) { var a = S.appts.filter(function (x) { return x.id === d.id; })[0]; startCall("cliente", a ? a.with : "Chiara M.", null, d.id); },
+  "join-now": function (d) { var p = getP(d.id); startCall("cliente", p ? p.assignee : "Chiara M.", p); },
+  "doc-del": function (d) { S.docs = S.docs.filter(function (x) { return x.id !== d.id; }); toast("Documento eliminato."); },
+  "fam-del": function (d) { S.family.splice(Number(d.i), 1); },
+  copy: function () { try { navigator.clipboard.writeText("QUADRA-DEMO26").then(function () { toast("Codice copiato."); }, function () { toast("Copia non disponibile qui: seleziona il codice."); }); } catch (e) { toast("Copia non disponibile qui: seleziona il codice."); } },
+  export: function () { toast("Esportazione simulata: riceverai un archivio dei tuoi dati."); },
+  delete1: function () { S.deleteStep = 1; }, delete0: function () { S.deleteStep = 0; },
+  delete2: function () { S.deleteStep = 0; S.auth = false; S.authStep = "login"; S.screen = null; toast("Account eliminato (simulato)."); },
+  "sess-out": function (d) { S.sessions = S.sessions.filter(function (s) { return s.id !== d.id; }); toast("Sessione disconnessa."); },
+  theme: function (d) { S.theme = d.v; applyPrefs(); },
+  fs: function (d) { S.fs = Number(d.v); applyPrefs(); },
+  lang: function (d) { S.lang = d.v; toast("Lingua registrata: " + d.v.toUpperCase()); },
+  "read-all": function () { S.notifs.forEach(function (n) { n.read = true; }); },
+  "assist-ask": function (d) { assistAsk(d.q); },
+  /* operatore */
+  optab: function (d) { S.opTab = d.t; },
+  filter: function (d) { S.filter = d.f; },
+  "op-open": function (d) { S.opSel = d.id; S.reasonFor = null; S.opDraft = ""; },
+  tpl: function (d) { S.opDraft = TEMPLATES[Number(d.i)]; },
+  "op-status": function (d) { var p = getP(S.opSel); if (p) setStatus(p, d.s); },
+  "op-visto": function () {
+    var p = getP(S.opSel); if (!p) return;
+    if (!isResp()) { toast("Solo il responsabile dell'assistenza fiscale può dare il visto."); return; }
+    p.visto = !p.visto; audit(p, p.visto ? "Visto di conformità applicato da " + curUser().name : "Visto rimosso");
+  },
+  "op-export": function () { var p = getP(S.opSel); if (p) { audit(p, "Esportata verso il CAF partner"); toast("Esportazione simulata verso il CAF partner."); } },
+  "op-approve": function (d) { var p = getP(S.opSel), x = p && findDoc(p.docs, d.d); if (x) { x.state = "ok"; audit(p, "Approvato: " + x.label); afterReupload(p); } S.reasonFor = null; },
+  "op-ask": function (d) { S.reasonFor = S.reasonFor === d.d ? null : d.d; },
+  "op-reason": function (d) {
+    var p = getP(S.opSel), x = p && findDoc(p.docs, d.d);
+    if (x) { x.state = "da integrare"; p.status = "Da integrare"; pushMsg(p, "operatore", x.label + ": " + d.r.toLowerCase() + ". Puoi caricarlo di nuovo?"); audit(p, "Richiesta integrazione: " + x.label); if (p.owner === "me") notify("Serve un documento nella pratica " + p.id + "."); }
+    S.reasonFor = null;
+  },
+  "op-call": function (d) { var p = getP(d.id); startCall("operatore", p.name, p); },
+  "op-join": function (d) { var a = S.appts.filter(function (x) { return x.id === d.id; })[0]; var p = a && S.inbox.filter(function (x) { return x.name === a.who; })[0]; startCall("operatore", a ? a.who : "Cliente", p || null, d.id); },
+  "appt-done": function (d) { var a = S.appts.filter(function (x) { return x.id === d.id; })[0]; if (a) a.status = "svolto"; },
+  "appt-cancel-op": function (d) { var a = S.appts.filter(function (x) { return x.id === d.id; })[0]; if (a) { a.status = "annullato"; if (a.owner === "me") notify("Il tuo appuntamento del " + dayLabel(a.day) + " è stato annullato."); } },
+  "client-open": function (d) { S.clientSel = d.n; },
+  "op-paid": function (d) { var p = getP(d.id); if (p) { p.paid = true; audit(p, "Incasso registrato da " + curUser().name); } },
+  /* chiamata */
+  "call-enter": function () {
+    var c = S.call; if (!c) return; c.phase = "live"; c.secs = 0;
+    var p = c.praticaId && getP(c.praticaId);
+    if (c.role === "operatore" && p) { c.shareTitle = "Pratica " + p.id + " · " + p.name; c.shareItems = p.docs.map(function (x) { return x.label; }); }
+    else if (p) { c.shareTitle = "Documenti della pratica"; c.shareItems = p.docs.map(function (x) { return x.label; }); }
+    else { c.shareTitle = "Checklist documenti"; c.shareItems = ["Documento d'identità", "Tessera sanitaria", "CU"]; }
+    clearInterval(S.timer);
+    S.timer = setInterval(function () { if (!S.call || S.call.phase !== "live") return; S.call.secs++; var t = document.getElementById("call-timer"); if (t) t.textContent = fmtSecs(S.call.secs); }, 1000);
+  },
+  "call-mic": function () { S.call.mic = !S.call.mic; },
+  "call-cam": function () { S.call.cam = !S.call.cam; },
+  "call-share": function () { S.call.share = !S.call.share; },
+  "call-caps": function () { S.call.caps = !S.call.caps; },
+  "call-chat": function () { S.call.chatOpen = !S.call.chatOpen; },
+  "call-end": function () { endCall(); }
+};
+var C = {
+  "book-topic": function (v) { S.book.topic = v; },
+  "book-pratica": function (v) { S.book.praticaId = v || null; },
+  retention: function (v) { S.retention = v; toast("Conservazione impostata a " + v + " anni."); },
+  assign: function (v) { var p = getP(S.opSel); if (p) { p.assignee = v; audit(p, "Assegnata a " + v); } },
+  "op-user": function (v) { S.opUser = Number(v); }
+};
+function assistAsk(q) {
+  q = String(q || "").trim(); if (!q) return;
+  S.assist.push({ from: "me", text: q });
+  var a = "Non ho una risposta pronta nel prototipo. Scrivi ad Assistenza e feedback per parlare con una persona.";
+  for (var i = 0; i < BOT.length; i++) if (BOT[i][0].test(q.toLowerCase())) { a = BOT[i][1]; break; }
+  S.assist.push({ from: "bot", text: a });
+}
+function applyPrefs() {
+  var r = document.documentElement;
+  if (S.theme === "system") r.removeAttribute("data-theme"); else r.setAttribute("data-theme", S.theme);
+  r.style.fontSize = S.fs + "%";
+}
+
+/* ============ render ============ */
+function render() {
+  var ae = document.activeElement, id = ae && ae.id, ss = null, se = null;
+  try { if (ae && typeof ae.selectionStart === "number") { ss = ae.selectionStart; se = ae.selectionEnd; } } catch (e) { /* alcuni tipi non hanno selezione */ }
+  renderTop();
+  document.getElementById("app").innerHTML = S.view === "client" ? viewClient() : viewOp();
+  renderOverlay();
+  if (id) { var el = document.getElementById(id); if (el && el.focus) { el.focus(); try { if (ss !== null) el.setSelectionRange(ss, se); } catch (e) { /* ignora */ } } }
+}
+document.addEventListener("click", function (e) {
+  var t = e.target.closest("[data-a]"); if (!t) return;
+  var fn = A[t.getAttribute("data-a")]; if (!fn) return;
+  fn(t.dataset, t, e); render();
+});
+document.addEventListener("change", function (e) {
+  var t = e.target; if (!t || !t.getAttribute) return;
+  var ck = t.getAttribute("data-a-change");
+  if (ck && C[ck]) { C[ck](t.value); render(); return; }
+  var tg = t.getAttribute("data-t");
+  if (tg) {
+    if (tg === "call-mic") { S.call.mic = t.checked; } else if (tg === "call-cam") { S.call.cam = t.checked; } else { S.flags[tg] = t.checked; }
+    render(); return;
+  }
+  if (t.type === "file" && t.files && t.files[0]) {
+    var name = t.files[0].name, ctx = t.getAttribute("data-ctx"), id = t.getAttribute("data-doc"), pid = t.getAttribute("data-p");
+    if (ctx === "draft") { var d = findDoc(S.draft, id); if (d) d.file = name; }
+    else if (ctx === "pratica") { var p = getP(pid), pd = p && findDoc(p.docs, id); if (pd) { pd.file = name; pd.state = "caricato"; audit(p, "Documento sostituito: " + pd.label); afterReupload(p); } }
+    else if (ctx === "extra") { var p2 = getP(pid); if (p2) { p2.docs.push({ id: "x" + Date.now(), label: "Documento aggiuntivo", file: name, state: "caricato" }); audit(p2, "Documento aggiunto dal cliente"); toast("Documento aggiunto."); } }
+    else if (ctx === "cassetto") { S.docs.push({ id: "d" + Date.now(), name: name, cat: "Altro", year: new Date().getFullYear(), exp: null }); toast("Aggiunto al cassetto."); }
+    else if (ctx === "chat") { var p3 = getP(pid); if (p3) pushMsg(p3, t.getAttribute("data-who"), "Allegato: " + name); }
+    render();
+  }
+});
+document.addEventListener("input", function (e) {
+  var t = e.target, k = t && t.getAttribute && t.getAttribute("data-i"); if (!k) return;
+  if (k === "qp") S.q = t.value; else if (k === "qc") S.qc = t.value; else if (k === "qd") S.qd = t.value; else if (k === "sim") S.sim = t.value; else if (k === "opdraft") S.opDraft = t.value;
+  else if (k === "cn") { if (S.clientSel) S.clientNotes[S.clientSel] = t.value; return; }
+  else if (k.indexOf("price:") === 0) { var n = Number(t.value); S.prices[k.slice(6)] = isNaN(n) ? 0 : Math.max(0, n); return; }
+  render();
+});
+document.addEventListener("submit", function (e) {
+  var f = e.target.closest && e.target.closest("[data-form]"); if (!f) return;
+  e.preventDefault();
+  var kind = f.getAttribute("data-form"), fd = new FormData(f), v = function (n) { return String(fd.get(n) || "").trim(); }, refocus = null;
+  if (kind === "otp") { S.auth = true; S.authStep = "login"; S.screen = null; toast("Accesso simulato completato."); }
+  else if (kind === "msg") {
+    var who = f.getAttribute("data-who"), text = v("t"), p = who === "cliente" ? getP(S.sel) : getP(S.opSel);
+    if (text && p) { pushMsg(p, who, text); if (who === "operatore") { S.opDraft = ""; if (p.owner === "me") notify("Nuovo messaggio sulla pratica " + p.id + "."); } refocus = "msg-" + who; }
+  }
+  else if (kind === "note") { var pn = getP(S.opSel), tx = v("t"); if (pn && tx) { pn.notes.push(tx); audit(pn, "Nota interna aggiunta"); refocus = "note"; } }
+  else if (kind === "profile") { S.me = { nome: v("nome"), email: v("email"), tel: v("tel") }; toast("Dati salvati."); }
+  else if (kind === "fam") { if (v("name")) { S.family.push({ name: v("name"), rel: v("rel") }); toast("Familiare aggiunto."); } }
+  else if (kind === "support") { if (v("s") && v("b")) { S.tickets.unshift({ s: v("s"), when: "Oggi " + nowT() }); toast("Richiesta inviata."); } }
+  else if (kind === "assist") { assistAsk(v("t")); refocus = "assist-q"; }
+  else if (kind === "team") { if (v("n")) { team.push({ name: v("n"), role: v("r"), load: 0 }); toast("Persona aggiunta."); } }
+  else if (kind === "call-chat") { var tt = v("t"); if (tt && S.call) { S.call.chat.push({ me: true, text: tt }); refocus = "call-chat-in"; } }
+  render();
+  if (refocus) { var el = document.getElementById(refocus); if (el) el.focus(); }
+});
+applyPrefs();
+render();
+</script>
+</body>
+</html>
